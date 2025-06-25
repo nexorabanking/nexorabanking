@@ -670,7 +670,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                         Select Bank
                       </Label>
                       <Select value={selectedBank} onValueChange={setSelectedBank} required>
-                        <SelectTrigger className="bg-white/5 border-white/20 text-[#581c87] md:text-white">
+                        <SelectTrigger className="bg-white/5 border-white/20 text-white md:text-white">
                           <SelectValue placeholder="Choose your bank" />
                         </SelectTrigger>
                         <SelectContent className="bg-white/10 border-white/20 backdrop-blur-xl">
