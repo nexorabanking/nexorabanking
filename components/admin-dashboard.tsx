@@ -164,7 +164,7 @@ export function AdminDashboard({ customers }: AdminDashboardProps) {
                   <span className="hidden md:inline">Logout</span>
                 </Button>
               </form>
-              <button type="button" aria-label="Menu" className="md:hidden p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
+              <button type="button" aria-label="Menu" className="hidden p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
                 <Menu className="h-5 w-5 text-white/70" />
               </button>
             </div>
