@@ -69,7 +69,7 @@ export default function HomePage() {
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300">
         {/* <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8"> */}
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-white/5 backdrop-blur-sm">
+              <TabsList className="grid w-full grid-cols-2 bg-gray-100 md:bg-white/5 backdrop-blur-sm">
                 <TabsTrigger
                   value="login"
                   className="data-[state=active]:bg-black md:data-[state=active]:bg-white/10 data-[state=active]:text-white md:data-[state=active]:text-white text-black md:text-white/70"
