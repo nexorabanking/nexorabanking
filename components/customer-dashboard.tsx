@@ -740,7 +740,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
             {/* Settings Tab */}
             <TabsContent value="settings" className="mt-6">
               <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                <div className="bg-[#581c87] md:bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-[#581c87] md:border-white/10">
                   <h3 className="text-lg font-semibold text-white mb-4">Account Settings</h3>
                   <div className="space-y-4">
                     <div>
@@ -751,7 +751,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                         id="email"
                         value={user.email}
                         disabled
-                        className="bg-white/5 border-white/20 text-white mt-1"
+                        className="bg-white/5 border-white/20 text-[#581c87] md:text-white mt-1"
                       />
                     </div>
                     <div>
@@ -762,7 +762,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                         id="account-number"
                         value={account.account_number}
                         disabled
-                        className="bg-white/5 border-white/20 text-white mt-1"
+                        className="bg-white/5 border-white/20 text-[#581c87] md:text-white mt-1"
                       />
                     </div>
                     <Button size="sm" className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 group">
