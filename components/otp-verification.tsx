@@ -65,10 +65,10 @@ export function OTPVerification({ email, isLogin = false }: OTPVerificationProps
             type="text"
             placeholder="Enter 6-digit code"
             maxLength={6}
-            className="input-modern text-center text-2xl tracking-widest"
+            className="input-modern text-center text-2xl tracking-widest text-[#9333ea] md:text-white/90"
             required
           />
-          <p className="text-xs text-white/50 text-center">Check your console for the demo OTP code</p>
+          <p className="text-xs text-white/50 text-center">Check your email for the verification code</p>
         </div>
 
         <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">

@@ -113,47 +113,109 @@ export async function verifyOTP(email: string, code: string): Promise<boolean> {
 // Enhanced email template for both login and signup
 async function sendOTPEmail(email: string, code: string): Promise<void> {
   try {
-    const emailConfig = {
-      host: env.email.host,
-      port: env.email.port,
-      secure: env.email.port === 465,
-      auth: {
-        user: env.email.user,
-        pass: env.email.password,
-      },
+    // For production, you have several options:
+    
+    // Option 1: Use a service like Resend (recommended)
+    // You'll need to set up RESEND_API_KEY in your environment variables
+    if (process.env.RESEND_API_KEY) {
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: env.email.from,
+          to: email,
+          subject: "Your Nexora Banking Security Code",
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; border-radius: 10px;">
+              <div style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
+                <div style="background: #7c3aed; width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                  <span style="color: white; font-size: 24px; font-weight: bold;">🛡️</span>
+                </div>
+                <h2 style="color: #1f2937; margin-bottom: 10px;">Security Verification</h2>
+                <p style="color: #6b7280; margin-bottom: 30px;">Your verification code for Nexora Banking:</p>
+                <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px dashed #7c3aed;">
+                  <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #7c3aed; font-family: monospace;">${code}</span>
+                </div>
+                <p style="color: #ef4444; font-size: 14px; margin: 20px 0;">This code expires in 5 minutes</p>
+                <div style="background: #fef3c7; padding: 15px; border-radius: 6px; margin-top: 20px;">
+                  <p style="color: #92400e; font-size: 12px; margin: 0;">
+                    🔒 For your security, never share this code with anyone. Nexora Banking will never ask for this code via phone or email.
+                  </p>
+                </div>
+                <p style="color: #9ca3af; font-size: 12px; margin-top: 20px;">
+                  If you didn't request this code, please ignore this email or contact our support team.
+                </p>
+              </div>
+            </div>
+          `,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Email service error: ${response.statusText}`);
+      }
+      
+      console.log(`📧 OTP email sent successfully to ${email}`);
+      return;
     }
 
-    const mailOptions = {
-      from: env.email.from,
-      to: email,
-      subject: "Your Olsa Banking Security Code",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; border-radius: 10px;">
-          <div style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
-            <div style="background: #7c3aed; width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
-              <span style="color: white; font-size: 24px; font-weight: bold;">🛡️</span>
-            </div>
-            <h2 style="color: #1f2937; margin-bottom: 10px;">Security Verification</h2>
-            <p style="color: #6b7280; margin-bottom: 30px;">Your verification code for Olsa Banking:</p>
-            <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px dashed #7c3aed;">
-              <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #7c3aed; font-family: monospace;">${code}</span>
-            </div>
-            <p style="color: #ef4444; font-size: 14px; margin: 20px 0;">This code expires in 5 minutes</p>
-            <div style="background: #fef3c7; padding: 15px; border-radius: 6px; margin-top: 20px;">
-              <p style="color: #92400e; font-size: 12px; margin: 0;">
-                🔒 For your security, never share this code with anyone. Olsa Banking will never ask for this code via phone or email.
-              </p>
-            </div>
-            <p style="color: #9ca3af; font-size: 12px; margin-top: 20px;">
-              If you didn't request this code, please ignore this email or contact our support team.
-            </p>
-          </div>
-        </div>
-      `,
+    // Option 2: Use SendGrid
+    if (process.env.SENDGRID_API_KEY) {
+      const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          personalizations: [{ to: [{ email }] }],
+          from: { email: env.email.from },
+          subject: "Your Nexora Banking Security Code",
+          content: [{
+            type: 'text/html',
+            value: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; border-radius: 10px;">
+                <div style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
+                  <div style="background: #7c3aed; width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                    <span style="color: white; font-size: 24px; font-weight: bold;">🛡️</span>
+                  </div>
+                  <h2 style="color: #1f2937; margin-bottom: 10px;">Security Verification</h2>
+                  <p style="color: #6b7280; margin-bottom: 30px;">Your verification code for Nexora Banking:</p>
+                  <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px dashed #7c3aed;">
+                    <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #7c3aed; font-family: monospace;">${code}</span>
+                  </div>
+                  <p style="color: #ef4444; font-size: 14px; margin: 20px 0;">This code expires in 5 minutes</p>
+                  <div style="background: #fef3c7; padding: 15px; border-radius: 6px; margin-top: 20px;">
+                    <p style="color: #92400e; font-size: 12px; margin: 0;">
+                      🔒 For your security, never share this code with anyone. Nexora Banking will never ask for this code via phone or email.
+                    </p>
+                  </div>
+                  <p style="color: #9ca3af; font-size: 12px; margin-top: 20px;">
+                    If you didn't request this code, please ignore this email or contact our support team.
+                  </p>
+                </div>
+              </div>
+            `,
+          }],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`SendGrid error: ${response.statusText}`);
+      }
+      
+      console.log(`📧 OTP email sent successfully to ${email}`);
+      return;
     }
 
-    console.log(`📧 Would send enhanced security email to ${email} with code ${code}`)
-    // await transporter.sendMail(mailOptions)
+    // Fallback: Log the code (for development/testing)
+    console.log(`📧 OTP for ${email}: ${code}`)
+    console.log(`📧 Email service not configured. Please set up RESEND_API_KEY or SENDGRID_API_KEY`)
+    console.log(`🔐 This code is required for both sign-in and account creation`)
+    
   } catch (error) {
     console.error("❌ Error sending OTP email:", error)
     throw new Error("Failed to send OTP email")

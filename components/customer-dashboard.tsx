@@ -335,7 +335,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
           <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-xl p-6 backdrop-blur-sm border border-white/10">
             <div className="flex flex-col md:flex-row md:items-end justify-between">
               <div>
-                <p className="text-white/60 text-sm mb-1">Available Balance</p>
+                <p className="text-[#581c874d] md:text-white/60 text-sm mb-1">Available Balance</p>
                 {balanceVisible ? (
                   <p className="text-4xl font-bold text-white">${account.balance.toFixed(2)}</p>
                 ) : (
