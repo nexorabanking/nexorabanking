@@ -740,7 +740,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
             {/* Settings Tab */}
             <TabsContent value="settings" className="mt-6">
               <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                <div className="bg-[#581c87] md:bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-[#581c87] md:border-white/10">
                   <h3 className="text-lg font-semibold text-white mb-4">Account Settings</h3>
                   <div className="space-y-4">
                     <div>
