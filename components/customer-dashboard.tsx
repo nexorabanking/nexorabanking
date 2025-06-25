@@ -335,16 +335,16 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
           <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-xl p-6 backdrop-blur-sm border border-white/10">
             <div className="flex flex-col md:flex-row md:items-end justify-between">
               <div>
-                <p className="text-[#581c874d] md:text-white/60 text-sm mb-1">Available Balance</p>
+                <p className="text-[#581c87] md:text-white/60 text-sm mb-1">Available Balance</p>
                 {balanceVisible ? (
-                  <p className="text-4xl font-bold text-white">${account.balance.toFixed(2)}</p>
+                  <p className="text-4xl font-bold text-[#581c87] md:text-white">${account.balance.toFixed(2)}</p>
                 ) : (
-                  <p className="text-4xl font-bold text-white">••••••</p>
+                  <p className="text-4xl font-bold text-[#581c87] md:text-white">••••••</p>
                 )}
               </div>
               <div className="mt-4 md:mt-0">
                 <div className="flex items-center space-x-2">
-                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Active</Badge>
+                  <Badge className="bg-[#581c874d] md:bg-green-500/20 text-[#581c87] md:text-green-400 border-[#581c87] md:border-green-500/30">Active</Badge>
                   <Badge className="bg-white/10 text-white/70 border-white/20">Personal</Badge>
                 </div>
               </div>
