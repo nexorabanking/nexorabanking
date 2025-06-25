@@ -66,6 +66,7 @@ export async function verifyOTP(email: string, code: string): Promise<boolean> {
     if (!stored) {
       if (env.app.isDevelopment) {
         console.log(`❌ No OTP found for ${email}`)
+        console.log(`📊 Current OTP store:`, Object.keys(otpStore))
       }
       return false
     }
@@ -75,6 +76,8 @@ export async function verifyOTP(email: string, code: string): Promise<boolean> {
       delete otpStore[email]
       if (env.app.isDevelopment) {
         console.log(`⏰ OTP expired for ${email}`)
+        console.log(`⏰ Expired at: ${new Date(stored.expires).toLocaleString()}`)
+        console.log(`⏰ Current time: ${new Date().toLocaleString()}`)
       }
       return false
     }
@@ -86,7 +89,7 @@ export async function verifyOTP(email: string, code: string): Promise<boolean> {
     if (stored.attempts > 3) {
       delete otpStore[email]
       if (env.app.isDevelopment) {
-        console.log(`🚫 Too many OTP attempts for ${email}`)
+        console.log(`🚫 Too many OTP attempts for ${email}. Attempts: ${stored.attempts}/3`)
       }
       return false
     }
@@ -95,6 +98,8 @@ export async function verifyOTP(email: string, code: string): Promise<boolean> {
     if (stored.code !== code) {
       if (env.app.isDevelopment) {
         console.log(`❌ Invalid OTP for ${email}. Attempts: ${stored.attempts}/3`)
+        console.log(`❌ Expected: ${stored.code}, Received: ${code}`)
+        console.log(`❌ Code length - Expected: ${stored.code.length}, Received: ${code.length}`)
       }
       return false
     }
@@ -266,6 +271,39 @@ async function sendOTPEmail(email: string, code: string): Promise<void> {
   } catch (error) {
     console.error("❌ Error sending OTP email:", error)
     throw new Error("Failed to send OTP email")
+  }
+}
+
+// Debug function to check OTP status (development only)
+export function getOTPStatus(email: string): any {
+  if (!env.app.isDevelopment) {
+    return { error: "Debug function only available in development" }
+  }
+
+  const stored = otpStore[email]
+  if (!stored) {
+    return { 
+      exists: false, 
+      message: "No OTP found for this email",
+      availableOTPs: Object.keys(otpStore)
+    }
+  }
+
+  const now = Date.now()
+  const timeLeft = Math.max(0, stored.expires - now)
+  const minutesLeft = Math.floor(timeLeft / 60000)
+  const secondsLeft = Math.floor((timeLeft % 60000) / 1000)
+
+  return {
+    exists: true,
+    code: stored.code,
+    attempts: stored.attempts,
+    maxAttempts: 3,
+    createdAt: new Date(stored.createdAt).toLocaleString(),
+    expiresAt: new Date(stored.expires).toLocaleString(),
+    timeLeft: `${minutesLeft}m ${secondsLeft}s`,
+    isExpired: now > stored.expires,
+    attemptsRemaining: Math.max(0, 3 - stored.attempts)
   }
 }
 
