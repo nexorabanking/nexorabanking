@@ -51,7 +51,7 @@ export function LoginForm() {
             Email Address
           </Label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/50" />
+            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#9333ea] md:text-white/90" />
             <Input
               id="email"
               name="email"
@@ -68,13 +68,13 @@ export function LoginForm() {
             Password
           </Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/50" />
+            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#9333ea] md:text-white/90" />
             <Input
               id="password"
               name="password"
               type="password"
               placeholder="Enter your password"
-              className="input-modern pl-12"
+              className="input-modern pl-12 text-[#9333ea] md:text-white/90"
               required
             />
           </div>
