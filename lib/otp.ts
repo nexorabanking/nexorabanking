@@ -10,7 +10,8 @@ interface OTPData {
   createdAt: number
 }
 
-const otpStore: { [email: string]: OTPData } = {}
+// Use Map instead of plain object for better performance and reliability
+const otpStore = new Map<string, OTPData>()
 
 export function generateOTP(): string {
   // Use crypto for secure random number generation
@@ -25,8 +26,13 @@ export async function sendOTP(email: string): Promise<string> {
     const expires = Date.now() + 5 * 60 * 1000 // 5 minutes
     const createdAt = Date.now()
 
+    if (env.app.isDevelopment) {
+      console.log(`🚀 Starting OTP process for ${email}`)
+      console.log(`📧 Generated code: ${code}`)
+    }
+
     // Check if there's an existing OTP that was sent recently (prevent spam)
-    const existing = otpStore[email]
+    const existing = otpStore.get(email)
     if (existing && createdAt - existing.createdAt < 60 * 1000) {
       // 1 minute cooldown
       if (env.app.isDevelopment) {
@@ -37,24 +43,27 @@ export async function sendOTP(email: string): Promise<string> {
 
     // Clear any existing OTP for this email to prevent conflicts
     if (existing) {
-      delete otpStore[email]
+      otpStore.delete(email)
       if (env.app.isDevelopment) {
         console.log(`🗑️ Cleared existing OTP for ${email}`)
       }
     }
 
     // Store the OTP immediately
-    otpStore[email] = {
+    const otpData: OTPData = {
       code,
       expires,
       attempts: 0,
       createdAt,
     }
+    
+    otpStore.set(email, otpData)
 
     if (env.app.isDevelopment) {
       console.log(`📧 Storing OTP for ${email}: ${code}`)
       console.log(`📧 OTP expires at: ${new Date(expires).toLocaleString()}`)
-      console.log(`📧 Current OTP store keys:`, Object.keys(otpStore))
+      console.log(`📧 Current OTP store size: ${otpStore.size}`)
+      console.log(`📧 Store keys:`, Array.from(otpStore.keys()))
     }
 
     // In production, send email using SMTP configuration
@@ -69,11 +78,14 @@ export async function sendOTP(email: string): Promise<string> {
 
     // Verify the OTP was stored correctly
     if (env.app.isDevelopment) {
-      const stored = otpStore[email]
+      const stored = otpStore.get(email)
       if (stored && stored.code === code) {
         console.log(`✅ OTP stored successfully for ${email}`)
+        console.log(`✅ Verification: stored code matches generated code`)
       } else {
         console.log(`❌ OTP storage verification failed for ${email}`)
+        console.log(`❌ Stored:`, stored)
+        console.log(`❌ Expected:`, code)
       }
     }
 
@@ -89,7 +101,7 @@ export async function verifyOTP(email: string, code: string): Promise<boolean> {
     // Add a small delay to ensure OTP is properly stored (prevents race conditions)
     await new Promise(resolve => setTimeout(resolve, 100))
 
-    const stored = otpStore[email]
+    const stored = otpStore.get(email)
 
     if (env.app.isDevelopment) {
       console.log(`🔍 Verifying OTP for ${email}`)
@@ -105,14 +117,15 @@ export async function verifyOTP(email: string, code: string): Promise<boolean> {
     if (!stored) {
       if (env.app.isDevelopment) {
         console.log(`❌ No OTP found for ${email}`)
-        console.log(`📊 Current OTP store:`, Object.keys(otpStore))
+        console.log(`📊 Current OTP store:`, Array.from(otpStore.keys()))
+        console.log(`📊 Store size: ${otpStore.size}`)
       }
       return false
     }
 
     // Check if OTP has expired
     if (Date.now() > stored.expires) {
-      delete otpStore[email]
+      otpStore.delete(email)
       if (env.app.isDevelopment) {
         console.log(`⏰ OTP expired for ${email}`)
         console.log(`⏰ Expired at: ${new Date(stored.expires).toLocaleString()}`)
@@ -126,7 +139,7 @@ export async function verifyOTP(email: string, code: string): Promise<boolean> {
 
     // Check for too many attempts
     if (stored.attempts > 3) {
-      delete otpStore[email]
+      otpStore.delete(email)
       if (env.app.isDevelopment) {
         console.log(`🚫 Too many OTP attempts for ${email}. Attempts: ${stored.attempts}/3`)
       }
@@ -136,6 +149,14 @@ export async function verifyOTP(email: string, code: string): Promise<boolean> {
     // Verify code (trim whitespace and normalize)
     const normalizedStoredCode = stored.code.trim()
     const normalizedReceivedCode = code.trim()
+    
+    if (env.app.isDevelopment) {
+      console.log(`🔍 Comparing codes:`)
+      console.log(`🔍 Stored (normalized): "${normalizedStoredCode}"`)
+      console.log(`🔍 Received (normalized): "${normalizedReceivedCode}"`)
+      console.log(`🔍 Length match: ${normalizedStoredCode.length === normalizedReceivedCode.length}`)
+      console.log(`🔍 Exact match: ${normalizedStoredCode === normalizedReceivedCode}`)
+    }
     
     if (normalizedStoredCode !== normalizedReceivedCode) {
       if (env.app.isDevelopment) {
@@ -147,7 +168,7 @@ export async function verifyOTP(email: string, code: string): Promise<boolean> {
     }
 
     // Success - clean up
-    delete otpStore[email]
+    otpStore.delete(email)
     if (env.app.isDevelopment) {
       console.log(`✅ OTP verified successfully for ${email}`)
     }
@@ -322,12 +343,13 @@ export function getOTPStatus(email: string): any {
     return { error: "Debug function only available in development" }
   }
 
-  const stored = otpStore[email]
+  const stored = otpStore.get(email)
   if (!stored) {
     return { 
       exists: false, 
       message: "No OTP found for this email",
-      availableOTPs: Object.keys(otpStore)
+      availableOTPs: Array.from(otpStore.keys()),
+      storeSize: otpStore.size
     }
   }
 
@@ -345,16 +367,56 @@ export function getOTPStatus(email: string): any {
     expiresAt: new Date(stored.expires).toLocaleString(),
     timeLeft: `${minutesLeft}m ${secondsLeft}s`,
     isExpired: now > stored.expires,
-    attemptsRemaining: Math.max(0, 3 - stored.attempts)
+    attemptsRemaining: Math.max(0, 3 - stored.attempts),
+    storeSize: otpStore.size
+  }
+}
+
+// Test function to manually test OTP system (development only)
+export async function testOTPSystem(email: string): Promise<any> {
+  if (!env.app.isDevelopment) {
+    return { error: "Test function only available in development" }
+  }
+
+  try {
+    console.log(`🧪 Testing OTP system for ${email}`)
+    
+    // Clear any existing OTP
+    otpStore.delete(email)
+    console.log(`🧪 Cleared existing OTP`)
+    
+    // Send new OTP
+    const code = await sendOTP(email)
+    console.log(`🧪 Sent OTP: ${code}`)
+    
+    // Wait a moment
+    await new Promise(resolve => setTimeout(resolve, 200))
+    
+    // Try to verify
+    const isValid = await verifyOTP(email, code)
+    console.log(`🧪 Verification result: ${isValid}`)
+    
+    return {
+      success: true,
+      code,
+      verificationResult: isValid,
+      finalStatus: getOTPStatus(email)
+    }
+  } catch (error) {
+    console.error(`🧪 Test failed:`, error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }
   }
 }
 
 // Clean up expired OTPs periodically
 export function cleanupExpiredOTPs(): void {
   const now = Date.now()
-  for (const [email, data] of Object.entries(otpStore)) {
+  for (const [email, data] of otpStore) {
     if (data.expires < now) {
-      delete otpStore[email]
+      otpStore.delete(email)
     }
   }
 }
