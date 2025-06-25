@@ -1,5 +1,6 @@
 import { env } from "./env"
 import crypto from "crypto"
+import nodemailer from "nodemailer"
 
 // Enhanced OTP management with environment variables
 interface OTPData {
@@ -211,9 +212,55 @@ async function sendOTPEmail(email: string, code: string): Promise<void> {
       return;
     }
 
+    // Option 3: Use Nodemailer with SMTP (if SMTP credentials are configured)
+    if (env.email.host && env.email.user && env.email.password) {
+      const transporter = nodemailer.createTransport({
+        host: env.email.host,
+        port: env.email.port,
+        secure: env.email.port === 465, // true for 465, false for other ports
+        auth: {
+          user: env.email.user,
+          pass: env.email.password,
+        },
+      });
+
+      const mailOptions = {
+        from: env.email.from,
+        to: email,
+        subject: "Your Nexora Banking Security Code",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; border-radius: 10px;">
+            <div style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
+              <div style="background: #7c3aed; width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                <span style="color: white; font-size: 24px; font-weight: bold;">🛡️</span>
+              </div>
+              <h2 style="color: #1f2937; margin-bottom: 10px;">Security Verification</h2>
+              <p style="color: #6b7280; margin-bottom: 30px;">Your verification code for Nexora Banking:</p>
+              <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px dashed #7c3aed;">
+                <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #7c3aed; font-family: monospace;">${code}</span>
+              </div>
+              <p style="color: #ef4444; font-size: 14px; margin: 20px 0;">This code expires in 5 minutes</p>
+              <div style="background: #fef3c7; padding: 15px; border-radius: 6px; margin-top: 20px;">
+                <p style="color: #92400e; font-size: 12px; margin: 0;">
+                  🔒 For your security, never share this code with anyone. Nexora Banking will never ask for this code via phone or email.
+                </p>
+              </div>
+              <p style="color: #9ca3af; font-size: 12px; margin-top: 20px;">
+                If you didn't request this code, please ignore this email or contact our support team.
+              </p>
+            </div>
+          </div>
+        `,
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`📧 OTP email sent successfully to ${email} via SMTP`);
+      return;
+    }
+
     // Fallback: Log the code (for development/testing)
     console.log(`📧 OTP for ${email}: ${code}`)
-    console.log(`📧 Email service not configured. Please set up RESEND_API_KEY or SENDGRID_API_KEY`)
+    console.log(`📧 Email service not configured. Please set up RESEND_API_KEY, SENDGRID_API_KEY, or SMTP credentials`)
     console.log(`🔐 This code is required for both sign-in and account creation`)
     
   } catch (error) {
