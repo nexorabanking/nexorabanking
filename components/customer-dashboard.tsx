@@ -656,7 +656,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                           placeholder="0.00"
                           value={withdrawalAmount}
                           onChange={(e) => setWithdrawalAmount(e.target.value)}
-                          className="bg-white/5 border-white/20 text-white pl-8"
+                          className="bg-white/5 border-white/20 text-[#581c87] md:text-white pl-8"
                           required
                         />
                       </div>
@@ -696,7 +696,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                   </form>
                 </div>
 
-                <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                <div className="bg-[#581c87] md:bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-[#581c87] md:border-white/10">
                   <h3 className="text-lg font-semibold text-white mb-4">Withdrawal Information</h3>
                   <div className="space-y-4">
                     <p className="text-white/70">Please note the following information regarding withdrawals:</p>
