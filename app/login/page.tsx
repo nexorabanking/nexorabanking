@@ -11,7 +11,7 @@ import { ArrowRight, Download, List, Eye, Users, TrendingUp, TrendingDown } from
 export default function HomePage() {
     return (
 
-        <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden">
+        <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden" style={{ backgroundColor: '#0a0a0f' }}>
       {/* Grid Background */}
       <div
         className="absolute inset-0 opacity-20"
