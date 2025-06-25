@@ -60,7 +60,7 @@ export function SignupForm() {
             Email Address
           </Label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#9333ea] md:text-white/90" />
+            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/90" />
             <Input
               id="signup-email"
               name="email"
@@ -77,7 +77,7 @@ export function SignupForm() {
             Password
           </Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#9333ea] md:text-white/90" />
+            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/90" />
             <Input
               id="signup-password"
               name="password"
@@ -94,7 +94,7 @@ export function SignupForm() {
             Confirm Password
           </Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#9333ea] md:text-white/90" />
+            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/90" />
             <Input
               id="confirm-password"
               name="confirmPassword"
