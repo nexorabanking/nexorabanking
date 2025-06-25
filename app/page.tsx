@@ -74,13 +74,13 @@ export default async function HomePage() {
         <div className="flex justify-center mb-8">
           <Badge className="bg-white/10 text-white border-white/20 px-4 py-2 rounded-full">
             <div className="w-2 h-2 bg-purple-400 rounded-full mr-2" />
-            Welcome to the beta version!
+            Welcome to Nexora Banking!
           </Badge>
         </div>
 
         {/* Hero Section */}
         <div className="text-center max-w-4xl mx-auto mb-16">
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+          <h1 className="text-3xl md:text-7xl font-bold text-white mb-6 leading-tight">
             A Touch of Class in
             <br />
             Your Every Financial Decision.
