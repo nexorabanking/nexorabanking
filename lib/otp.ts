@@ -35,11 +35,26 @@ export async function sendOTP(email: string): Promise<string> {
       throw new Error("Please wait before requesting a new verification code")
     }
 
+    // Clear any existing OTP for this email to prevent conflicts
+    if (existing) {
+      delete otpStore[email]
+      if (env.app.isDevelopment) {
+        console.log(`🗑️ Cleared existing OTP for ${email}`)
+      }
+    }
+
+    // Store the OTP immediately
     otpStore[email] = {
       code,
       expires,
       attempts: 0,
       createdAt,
+    }
+
+    if (env.app.isDevelopment) {
+      console.log(`📧 Storing OTP for ${email}: ${code}`)
+      console.log(`📧 OTP expires at: ${new Date(expires).toLocaleString()}`)
+      console.log(`📧 Current OTP store keys:`, Object.keys(otpStore))
     }
 
     // In production, send email using SMTP configuration
@@ -52,6 +67,16 @@ export async function sendOTP(email: string): Promise<string> {
       await sendOTPEmail(email, code)
     }
 
+    // Verify the OTP was stored correctly
+    if (env.app.isDevelopment) {
+      const stored = otpStore[email]
+      if (stored && stored.code === code) {
+        console.log(`✅ OTP stored successfully for ${email}`)
+      } else {
+        console.log(`❌ OTP storage verification failed for ${email}`)
+      }
+    }
+
     return code
   } catch (error) {
     console.error("❌ Error sending OTP:", error)
@@ -61,7 +86,21 @@ export async function sendOTP(email: string): Promise<string> {
 
 export async function verifyOTP(email: string, code: string): Promise<boolean> {
   try {
+    // Add a small delay to ensure OTP is properly stored (prevents race conditions)
+    await new Promise(resolve => setTimeout(resolve, 100))
+
     const stored = otpStore[email]
+
+    if (env.app.isDevelopment) {
+      console.log(`🔍 Verifying OTP for ${email}`)
+      console.log(`🔍 Received code: ${code}`)
+      console.log(`🔍 Stored OTP exists: ${!!stored}`)
+      if (stored) {
+        console.log(`🔍 Stored code: ${stored.code}`)
+        console.log(`🔍 Attempts: ${stored.attempts}/3`)
+        console.log(`🔍 Expires at: ${new Date(stored.expires).toLocaleString()}`)
+      }
+    }
 
     if (!stored) {
       if (env.app.isDevelopment) {
@@ -94,12 +133,15 @@ export async function verifyOTP(email: string, code: string): Promise<boolean> {
       return false
     }
 
-    // Verify code
-    if (stored.code !== code) {
+    // Verify code (trim whitespace and normalize)
+    const normalizedStoredCode = stored.code.trim()
+    const normalizedReceivedCode = code.trim()
+    
+    if (normalizedStoredCode !== normalizedReceivedCode) {
       if (env.app.isDevelopment) {
         console.log(`❌ Invalid OTP for ${email}. Attempts: ${stored.attempts}/3`)
-        console.log(`❌ Expected: ${stored.code}, Received: ${code}`)
-        console.log(`❌ Code length - Expected: ${stored.code.length}, Received: ${code.length}`)
+        console.log(`❌ Expected: "${normalizedStoredCode}", Received: "${normalizedReceivedCode}"`)
+        console.log(`❌ Code length - Expected: ${normalizedStoredCode.length}, Received: ${normalizedReceivedCode.length}`)
       }
       return false
     }
