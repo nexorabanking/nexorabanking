@@ -57,7 +57,7 @@ export function LoginForm() {
               name="email"
               type="email"
               placeholder="Enter your email"
-              className="input-modern pl-12"
+              className="input-modern pl-12 text-[#9333ea] md:text-white/90"
               required
             />
           </div>
