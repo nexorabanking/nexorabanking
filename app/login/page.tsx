@@ -72,13 +72,13 @@ export default function HomePage() {
               <TabsList className="grid w-full grid-cols-2 bg-white/5 backdrop-blur-sm">
                 <TabsTrigger
                   value="login"
-                  className="data-[state=active]:bg-black data-[state=active]:text-white md:data-[state=active]:text-white text-black md:text-white/70"
+                  className="data-[state=active]:bg-black md:data-[state=active]:bg-white/10 data-[state=active]:text-white md:data-[state=active]:text-white text-black md:text-white/70"
                 >
                   Sign In
                 </TabsTrigger>
                 <TabsTrigger
                   value="signup"
-                  className="data-[state=active]:bg-white/10 data-[state=active]:text-white md:data-[state=active]:text-white text-black md:text-white/70"
+                  className="data-[state=active]:bg-black md:data-[state=active]:bg-white/10 data-[state=active]:text-white md:data-[state=active]:text-white text-black md:text-white/70"
                 >
                   Create Account
                 </TabsTrigger>
