@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   ArrowRight,
   ArrowDownLeft,
@@ -56,6 +57,7 @@ interface LivePriceData {
 
 export function CustomerDashboard({ user, account, transactions }: CustomerDashboardProps) {
   const [withdrawalAmount, setWithdrawalAmount] = useState("")
+  const [selectedBank, setSelectedBank] = useState("")
   const [message, setMessage] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
@@ -63,6 +65,31 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
   const [activeTab, setActiveTab] = useState("overview")
   const [livePrices, setLivePrices] = useState<LivePriceData[]>([])
   const [pricesLoading, setPricesLoading] = useState(true)
+
+  // List of major American banks
+  const americanBanks = [
+    { value: "chase", label: "Chase Bank" },
+    { value: "bank-of-america", label: "Bank of America" },
+    { value: "wells-fargo", label: "Wells Fargo" },
+    { value: "citibank", label: "Citibank" },
+    { value: "us-bank", label: "U.S. Bank" },
+    { value: "pnc-bank", label: "PNC Bank" },
+    { value: "capital-one", label: "Capital One" },
+    { value: "td-bank", label: "TD Bank" },
+    { value: "goldman-sachs", label: "Goldman Sachs" },
+    { value: "morgan-stanley", label: "Morgan Stanley" },
+    { value: "american-express", label: "American Express Bank" },
+    { value: "regions-bank", label: "Regions Bank" },
+    { value: "bbt", label: "BB&T (Truist)" },
+    { value: "suntrust", label: "SunTrust (Truist)" },
+    { value: "keybank", label: "KeyBank" },
+    { value: "fifth-third", label: "Fifth Third Bank" },
+    { value: "huntington", label: "Huntington Bank" },
+    { value: "citizens-bank", label: "Citizens Bank" },
+    { value: "comerica", label: "Comerica Bank" },
+    { value: "bmo-harris", label: "BMO Harris Bank" },
+    // { value: "other", label: "Other Bank" },
+  ]
 
   // Fetch live prices
   const fetchLivePrices = async () => {
@@ -639,6 +666,72 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                     )}
 
                     <div className="space-y-2">
+                      <Label htmlFor="bank" className="text-white/90">
+                        Select Bank
+                      </Label>
+                      <Select value={selectedBank} onValueChange={setSelectedBank} required>
+                        <SelectTrigger className="bg-white/5 border-white/20 text-[#581c87] md:text-white">
+                          <SelectValue placeholder="Choose your bank" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white/10 border-white/20 backdrop-blur-xl">
+                          {americanBanks.map((bank) => (
+                            <SelectItem key={bank.value} value={bank.value} className="text-white hover:bg-white/10">
+                              {bank.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {selectedBank && selectedBank !== "other" && (
+                      <div className="space-y-2">
+                        <Label htmlFor="account-number" className="text-white/90">
+                          Account Number
+                        </Label>
+                        <Input
+                          id="account-number"
+                          name="accountNumber"
+                          type="text"
+                          placeholder="Enter your account number"
+                          className="bg-white/5 border-white/20 text-[#581c87] md:text-white"
+                          required
+                        />
+                        <p className="text-xs text-white/50">Please enter the account number for your {americanBanks.find(b => b.value === selectedBank)?.label} account</p>
+                      </div>
+                    )}
+
+                    {selectedBank === "other" && (
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="other-bank-name" className="text-white/90">
+                            Bank Name
+                          </Label>
+                          <Input
+                            id="other-bank-name"
+                            name="otherBankName"
+                            type="text"
+                            placeholder="Enter your bank name"
+                            className="bg-white/5 border-white/20 text-[#581c87] md:text-white"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="other-account-number" className="text-white/90">
+                            Account Number
+                          </Label>
+                          <Input
+                            id="other-account-number"
+                            name="otherAccountNumber"
+                            type="text"
+                            placeholder="Enter your account number"
+                            className="bg-white/5 border-white/20 text-[#581c87] md:text-white"
+                            required
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
                       <Label htmlFor="amount" className="text-white/90">
                         Withdrawal Amount
                       </Label>
@@ -682,7 +775,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                     <Button
                       type="submit"
                       className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
-                      disabled={loading}
+                      disabled={loading || !selectedBank}
                     >
                       {loading ? (
                         "Processing..."
@@ -699,6 +792,14 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                 <div className="bg-[#581c87] md:bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-[#581c87] md:border-white/10">
                   <h3 className="text-lg font-semibold text-white mb-4">Withdrawal Information</h3>
                   <div className="space-y-4">
+                    {selectedBank && (
+                      <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+                        <p className="text-green-400 text-sm font-medium">
+                          Selected Bank: {americanBanks.find(b => b.value === selectedBank)?.label || "Other Bank"}
+                        </p>
+                      </div>
+                    )}
+                    
                     <p className="text-white/70">Please note the following information regarding withdrawals:</p>
                     <ul className="space-y-2 text-white/70">
                       <li className="flex items-start">
@@ -711,7 +812,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                         <div className="w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center mr-2 mt-0.5">
                           •
                         </div>
-                        <span>Processing time is typically 1-3 business days</span>
+                        <span>Bank transfers typically process in 1-3 business days</span>
                       </li>
                       <li className="flex items-start">
                         <div className="w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center mr-2 mt-0.5">
@@ -724,6 +825,12 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                           •
                         </div>
                         <span>All withdrawals are subject to security verification</span>
+                      </li>
+                      <li className="flex items-start">
+                        <div className="w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center mr-2 mt-0.5">
+                          •
+                        </div>
+                        <span>Please ensure your account number is correct to avoid delays</span>
                       </li>
                     </ul>
 
