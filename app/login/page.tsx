@@ -36,8 +36,8 @@ export default function HomePage() {
                 <div className="w-4 h-4 bg-black rounded-sm" />
               </div>
               <div>
-                <h1 className="text-white font-semibold text-lg">Nexora</h1>
-                <p className="text-white/60 text-sm -mt-1">Banking</p>
+                <h1 className="text-black md:text-white font-semibold text-lg">Nexora</h1>
+                <p className="text-black/60 md:text-white/60 text-sm -mt-1">Banking</p>
               </div>
             </div>
             </Link>
@@ -72,13 +72,13 @@ export default function HomePage() {
               <TabsList className="grid w-full grid-cols-2 bg-white/5 backdrop-blur-sm">
                 <TabsTrigger
                   value="login"
-                  className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/70"
+                  className="data-[state=active]:bg-white/10 data-[state=active]:text-white md:data-[state=active]:text-white text-black md:text-white/70"
                 >
                   Sign In
                 </TabsTrigger>
                 <TabsTrigger
                   value="signup"
-                  className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/70"
+                  className="data-[state=active]:bg-white/10 data-[state=active]:text-white md:data-[state=active]:text-white text-black md:text-white/70"
                 >
                   Create Account
                 </TabsTrigger>
@@ -86,16 +86,16 @@ export default function HomePage() {
 
               <TabsContent value="login" className="mt-6">
                 <div className="text-center mb-6">
-                  <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
-                  <p className="text-white/60">Access your sophisticated banking experience</p>
+                  <h2 className="text-2xl font-bold text-black md:text-white mb-2">Welcome Back</h2>
+                  <p className="text-black/60 md:text-white/60">Access your sophisticated banking experience</p>
                 </div>
                 <LoginForm />
               </TabsContent>
 
               <TabsContent value="signup" className="mt-6">
                 <div className="text-center mb-6">
-                  <h2 className="text-2xl font-bold text-white mb-2">Join Olsa Banking</h2>
-                  <p className="text-white/60">Experience the future of financial management</p>
+                  <h2 className="text-2xl font-bold text-black md:text-white mb-2">Join Nexora Banking</h2>
+                  <p className="text-black/60 md:text-white/60">Experience the future of financial management</p>
                 </div>
                 <SignupForm />
               </TabsContent>
