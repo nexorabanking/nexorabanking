@@ -116,9 +116,21 @@ export default async function HomePage() {
 
             <div className="flex items-center space-x-3">
               <div className="flex -space-x-2">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-400 to-red-400 border-2 border-white/20" />
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 border-2 border-white/20" />
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-emerald-400 border-2 border-white/20" />
+                <img 
+                  src="/client-1.jpeg?w=40&h=40&fit=crop&crop=face&auto=format" 
+                  alt="User 1" 
+                  className="w-10 h-10 rounded-full border-2 border-white/20 object-cover"
+                />
+                <img 
+                  src="/client-2.jpeg?w=40&h=40&fit=crop&crop=face&auto=format" 
+                  alt="User 2" 
+                  className="w-10 h-10 rounded-full border-2 border-white/20 object-cover"
+                />
+                <img 
+                  src="/client-3.jpeg?w=40&h=40&fit=crop&crop=face&auto=format" 
+                  alt="User 3" 
+                  className="w-10 h-10 rounded-full border-2 border-white/20 object-cover"
+                />
               </div>
               <div className="text-left">
                 <p className="text-white font-medium">Trusted by over +20K</p>
@@ -130,10 +142,10 @@ export default async function HomePage() {
 
         {/* Crypto Prices Table */}
         <div className="mb-16">
-          <div className="text-center mb-8">
+          {/* <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-white mb-4">Live Crypto Prices</h2>
             <p className="text-white/60">Real-time cryptocurrency market data</p>
-          </div>
+          </div> */}
           <CryptoPricesTable />
         </div>
 
