@@ -387,28 +387,28 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
         {/* Main Content Tabs */}
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
           <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="bg-white/5 border border-white/10">
+            <TabsList className="bg-white/5 border border-white/10 overflow-x-auto flex-nowrap w-full">
               <TabsTrigger
                 value="overview"
-                className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/70"
+                className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/70 whitespace-nowrap flex-shrink-0"
               >
                 Overview
               </TabsTrigger>
               <TabsTrigger
                 value="transactions"
-                className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/70"
+                className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/70 whitespace-nowrap flex-shrink-0"
               >
                 Transactions
               </TabsTrigger>
               <TabsTrigger
                 value="transfer"
-                className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/70"
+                className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/70 whitespace-nowrap flex-shrink-0"
               >
                 Transfer
               </TabsTrigger>
               <TabsTrigger
                 value="settings"
-                className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/70"
+                className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/70 whitespace-nowrap flex-shrink-0"
               >
                 Settings
               </TabsTrigger>
@@ -827,7 +827,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
             </TabsContent>
 
              {/* Live Market Rates - Full Width Section */}
-             <div className="mt-8">
+             <div className="mt-8 hidden md:block">
               <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-semibold text-white">Live Market Rates</h3>
