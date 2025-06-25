@@ -6,12 +6,9 @@ import Link from "next/link"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowRight, Download, List, Eye, Users, TrendingUp, TrendingDown } from "lucide-react"
 
-
-
 export default function HomePage() {
     return (
-
-        <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden" style={{ backgroundColor: '#0a0a0f' }}>
+        <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden" style={{ backgroundColor: '#0a0a0f', color: 'white' }}>
       {/* Grid Background */}
       <div
         className="absolute inset-0 opacity-20"
@@ -28,10 +25,8 @@ export default function HomePage() {
       <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-purple-600/20 via-transparent to-transparent" />
       <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
 
-
-
- {/* Header */}
- <header className="relative z-10 border-b border-white/10 backdrop-blur-sm">
+      {/* Header */}
+      <header className="relative z-10 border-b border-white/10 backdrop-blur-sm">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}

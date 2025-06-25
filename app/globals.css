@@ -56,6 +56,21 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Force dark background for specific pages */
+  body > div:first-child {
+    background-color: #0a0a0f !important;
+  }
+  
+  /* Ensure dark background on mobile */
+  @media (max-width: 768px) {
+    body {
+      background-color: #0a0a0f !important;
+    }
+    body > div:first-child {
+      background-color: #0a0a0f !important;
+    }
+  }
 }
 
 @layer components {
