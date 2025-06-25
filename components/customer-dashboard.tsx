@@ -308,8 +308,12 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                 </div>
               </div>
               <form action={logout}>
-              <Button size="sm" className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 group">
-                  <LogOut className="h-4 w-4 mr-2" />
+                <Button 
+                  type="submit"
+                  size="sm" 
+                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 group"
+                >
+                  <LogOut className="h-4 w-4 md:mr-2" />
                   <span className="hidden md:inline">Logout</span>
                 </Button>
               </form>
