@@ -4,11 +4,9 @@ export const env = {
     isProduction: process.env.NODE_ENV === "production",
   },
   email: {
-    host: process.env.SMTP_HOST || "localhost",
-    port: parseInt(process.env.SMTP_PORT || "587"),
-    user: process.env.SMTP_USER || "",
-    password: process.env.SMTP_PASSWORD || "",
-    from: process.env.SMTP_FROM || "noreply@olsabank.com",
+    // Resend configuration
+    resendApiKey: process.env.RESEND_API_KEY || "",
+    fromEmail: process.env.RESEND_FROM_EMAIL || "noreply@nexorabanking.com",
   },
   security: {
     bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS || "12"),

@@ -5,6 +5,14 @@ export const metadata: Metadata = {
   title: 'Nexora Banking',
   description: 'Nexora Banking',
   generator: 'Nexora Banking',
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({
