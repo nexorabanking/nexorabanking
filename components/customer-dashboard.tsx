@@ -492,9 +492,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                               )}
                             </div>
                             <div>
-                              <p className="font-medium text-white capitalize">
-                                {transaction.type.replace("_", " ")}
-                              </p>
+                            <p className="font-medium text-white capitalize">{transaction.description || "No description"}</p>
                               <p className="text-sm text-white/60">
                                 {new Date(transaction.created_at).toLocaleDateString()}
                               </p>
@@ -620,8 +618,8 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                           )}
                         </div>
                         <div>
-                          <p className="font-medium text-white capitalize">{transaction.type.replace("_", " ")}</p>
-                          <p className="text-sm text-white/60">{transaction.description || "No description"}</p>
+                          {/* <p className="font-medium text-white capitalize">{transaction.type.replace("_", " ")}</p> */}
+                          <p className="font-medium text-white capitalize">{transaction.description || "No description"}</p>
                           <p className="text-xs text-white/40">{new Date(transaction.created_at).toLocaleString()}</p>
                         </div>
                       </div>
