@@ -9,8 +9,44 @@ interface OTPData {
   createdAt: number
 }
 
+// Server instance tracking
+const serverInstanceId = Math.random().toString(36).substring(7)
+const serverStartTime = Date.now()
+
+console.log(`🚀 OTP System initialized - Instance: ${serverInstanceId} - Start time: ${new Date(serverStartTime).toISOString()}`)
+
 // Use Map instead of plain object for better performance and reliability
 const otpStore = new Map<string, OTPData>()
+
+// Debug function to track OTP store changes
+function logOTPStoreChange(action: string, email: string, details?: any) {
+  const timestamp = new Date().toISOString()
+  console.log(`🔍 [STORE-${action}] ${timestamp} - Email: ${email} - Store size: ${otpStore.size}`)
+  if (details) {
+    console.log(`🔍 [STORE-${action}] Details:`, details)
+  }
+  console.log(`🔍 [STORE-${action}] Available emails:`, Array.from(otpStore.keys()))
+}
+
+// Override Map methods to add logging
+const originalSet = otpStore.set.bind(otpStore)
+const originalDelete = otpStore.delete.bind(otpStore)
+const originalClear = otpStore.clear.bind(otpStore)
+
+otpStore.set = function(key: string, value: OTPData) {
+  logOTPStoreChange('SET', key, { code: value.code, expires: new Date(value.expires).toISOString() })
+  return originalSet(key, value)
+}
+
+otpStore.delete = function(key: string) {
+  logOTPStoreChange('DELETE', key)
+  return originalDelete(key)
+}
+
+otpStore.clear = function() {
+  logOTPStoreChange('CLEAR', 'ALL')
+  return originalClear()
+}
 
 export function generateOTP(): string {
   // Use crypto for secure random number generation
@@ -305,7 +341,12 @@ export function getOTPStatus(email: string): any {
       exists: false, 
       message: "No OTP found for this email",
       availableOTPs: Array.from(otpStore.keys()),
-      storeSize: otpStore.size
+      storeSize: otpStore.size,
+      serverInfo: {
+        instanceId: serverInstanceId,
+        startTime: new Date(serverStartTime).toISOString(),
+        uptime: Date.now() - serverStartTime
+      }
     }
   }
 
@@ -324,7 +365,12 @@ export function getOTPStatus(email: string): any {
     timeLeft: `${minutesLeft}m ${secondsLeft}s`,
     isExpired: now > stored.expires,
     attemptsRemaining: Math.max(0, 3 - stored.attempts),
-    storeSize: otpStore.size
+    storeSize: otpStore.size,
+    serverInfo: {
+      instanceId: serverInstanceId,
+      startTime: new Date(serverStartTime).toISOString(),
+      uptime: Date.now() - serverStartTime
+    }
   }
 }
 
