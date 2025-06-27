@@ -71,7 +71,15 @@ export async function sendOTP(email: string): Promise<string> {
       console.log(`🔐 This code is required for both sign-in and account creation`)
     } else {
       // Send actual email using Resend
-      await sendOTPEmail(email, code)
+      try {
+        await sendOTPEmail(email, code)
+      } catch (error) {
+        // Temporary fallback for debugging - log the OTP in production if email fails
+        console.log(`⚠️ Email sending failed, but here's the OTP for ${email}: ${code}`)
+        console.log(`⚠️ This is a temporary fallback while debugging email configuration`)
+        // Don't throw the error, just log it for now
+        console.error(`⚠️ Email error:`, error)
+      }
     }
 
     // Verify the OTP was stored correctly
@@ -180,13 +188,26 @@ export async function verifyOTP(email: string, code: string): Promise<boolean> {
 // Enhanced email template using Resend
 async function sendOTPEmail(email: string, code: string): Promise<void> {
   try {
+    // Debug environment variables
+    console.log(`🔧 Environment Debug:`)
+    console.log(`🔧 NODE_ENV: ${process.env.NODE_ENV}`)
+    console.log(`🔧 RESEND_API_KEY exists: ${!!process.env.RESEND_API_KEY}`)
+    console.log(`🔧 RESEND_API_KEY length: ${process.env.RESEND_API_KEY?.length || 0}`)
+    console.log(`🔧 env.email.resendApiKey exists: ${!!env.email.resendApiKey}`)
+    console.log(`🔧 env.email.resendApiKey length: ${env.email.resendApiKey?.length || 0}`)
+    console.log(`🔧 env.email.fromEmail: ${env.email.fromEmail}`)
+
     // Check if Resend API key is configured
     if (!env.email.resendApiKey) {
+      console.error(`❌ RESEND_API_KEY is missing or empty`)
+      console.error(`❌ process.env.RESEND_API_KEY: ${process.env.RESEND_API_KEY ? 'EXISTS' : 'MISSING'}`)
       throw new Error("RESEND_API_KEY is not configured. Please set it in your environment variables.");
     }
 
     // Get sender email from environment configuration
     const senderEmail = env.email.fromEmail;
+    
+    console.log(`📧 Attempting to send email to ${email} from ${senderEmail}`)
     
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -224,8 +245,11 @@ async function sendOTPEmail(email: string, code: string): Promise<void> {
       }),
     });
 
+    console.log(`📧 Resend API response status: ${response.status}`)
+
     if (!response.ok) {
       const errorData = await response.text();
+      console.error(`❌ Resend API error response: ${errorData}`)
       throw new Error(`Resend API error: ${response.status} - ${errorData}`);
     }
     
