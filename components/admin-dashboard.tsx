@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { logout } from "@/app/actions/auth"
-import { updateCustomerDetails } from "@/app/actions/banking"
+import { updateCustomerDetails, updateTransactionDetails } from "@/app/actions/banking"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -39,6 +39,25 @@ import {
   Eye,
 } from "lucide-react"
 
+interface Transaction {
+  id: number
+  account_id: number
+  type: "deposit" | "withdrawal" | "admin_adjustment"
+  amount: number
+  status: "pending" | "completed" | "rejected"
+  description?: string
+  created_at: Date
+  processed_at?: Date
+  user: {
+    id: number
+    email: string
+  }
+  account: {
+    id: number
+    account_number: string
+  }
+}
+
 interface Customer {
   id: number
   email: string
@@ -52,18 +71,25 @@ interface Customer {
 
 interface AdminDashboardProps {
   customers: Customer[]
+  transactions: Transaction[]
 }
 
-export function AdminDashboard({ customers }: AdminDashboardProps) {
+export function AdminDashboard({ customers, transactions }: AdminDashboardProps) {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
   const [newBalance, setNewBalance] = useState("")
   const [newAccountNumber, setNewAccountNumber] = useState("")
+  const [newDescription, setNewDescription] = useState("")
+  const [newStatus, setNewStatus] = useState<"pending" | "completed" | "rejected">("pending")
+  const [newCreatedDate, setNewCreatedDate] = useState("")
+  const [newCreatedTime, setNewCreatedTime] = useState("")
   const [message, setMessage] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("dashboard")
   const [searchQuery, setSearchQuery] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [transactionDialogOpen, setTransactionDialogOpen] = useState(false)
 
   async function handleCustomerUpdate(formData: FormData) {
     setLoading(true)
@@ -80,6 +106,28 @@ export function AdminDashboard({ customers }: AdminDashboardProps) {
       setNewAccountNumber("")
       setSelectedCustomer(null)
       setDialogOpen(false)
+    }
+
+    setLoading(false)
+  }
+
+  async function handleTransactionUpdate(formData: FormData) {
+    setLoading(true)
+    setError("")
+    setMessage("")
+
+    const result = await updateTransactionDetails(formData)
+
+    if (result?.error) {
+      setError(result.error)
+    } else if (result?.success) {
+      setMessage("Transaction updated successfully")
+      setNewDescription("")
+      setNewStatus("pending")
+      setNewCreatedDate("")
+      setNewCreatedTime("")
+      setSelectedTransaction(null)
+      setTransactionDialogOpen(false)
     }
 
     setLoading(false)
@@ -686,13 +734,210 @@ export function AdminDashboard({ customers }: AdminDashboardProps) {
                 </div>
               </div>
 
+              {/* Transaction Table */}
               <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center">
-                    <BarChart3 className="h-8 w-8 text-white/30" />
-                  </div>
-                  <p className="text-white/70">Transaction monitoring coming soon</p>
-                  <p className="text-white/40 text-sm mt-1">This feature will be available in the next update</p>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-white/10">
+                        <th className="text-left py-3 px-4 text-white/60 font-medium">Transaction ID</th>
+                        <th className="text-left py-3 px-4 text-white/60 font-medium">Customer</th>
+                        <th className="text-left py-3 px-4 text-white/60 font-medium">Account</th>
+                        <th className="text-left py-3 px-4 text-white/60 font-medium">Type</th>
+                        <th className="text-left py-3 px-4 text-white/60 font-medium">Amount</th>
+                        <th className="text-left py-3 px-4 text-white/60 font-medium">Status</th>
+                        <th className="text-left py-3 px-4 text-white/60 font-medium">Date</th>
+                        <th className="text-left py-3 px-4 text-white/60 font-medium">Description</th>
+                        <th className="text-right py-3 px-4 text-white/60 font-medium">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {transactions.length === 0 ? (
+                        <tr>
+                          <td colSpan={9} className="py-8 text-center text-white/60">
+                            No transactions found
+                          </td>
+                        </tr>
+                      ) : (
+                        transactions.map((transaction) => (
+                          <tr key={transaction.id} className="border-b border-white/5 hover:bg-white/5">
+                            <td className="py-3 px-4">
+                              <p className="text-white/80 font-mono text-sm">#{transaction.id}</p>
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="flex items-center">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 flex items-center justify-center text-white font-medium mr-3">
+                                  {transaction.user.email.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                  <p className="text-white font-medium">{transaction.user.email}</p>
+                                  <p className="text-white/40 text-xs">ID: {transaction.user.id}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4">
+                              <p className="text-white/80 font-mono text-sm">{transaction.account.account_number}</p>
+                            </td>
+                            <td className="py-3 px-4">
+                              <Badge
+                                className={
+                                  transaction.type === "deposit"
+                                    ? "bg-green-500/20 text-green-400 border-green-500/30"
+                                    : transaction.type === "withdrawal"
+                                    ? "bg-red-500/20 text-red-400 border-red-500/30"
+                                    : "bg-purple-500/20 text-purple-400 border-purple-500/30"
+                                }
+                              >
+                                {transaction.type.replace("_", " ").toUpperCase()}
+                              </Badge>
+                            </td>
+                            <td className="py-3 px-4">
+                              <p className={`font-medium ${transaction.type === "withdrawal" ? "text-red-400" : "text-green-400"}`}>
+                                {transaction.type === "withdrawal" ? "-" : "+"}${transaction.amount.toFixed(2)}
+                              </p>
+                            </td>
+                            <td className="py-3 px-4">
+                              <Badge
+                                className={
+                                  transaction.status === "completed"
+                                    ? "bg-green-500/20 text-green-400 border-green-500/30"
+                                    : transaction.status === "pending"
+                                    ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
+                                    : "bg-red-500/20 text-red-400 border-red-500/30"
+                                }
+                              >
+                                {transaction.status.toUpperCase()}
+                              </Badge>
+                            </td>
+                            <td className="py-3 px-4">
+                              <p className="text-white/80 text-sm">
+                                {new Date(transaction.created_at).toLocaleDateString()}
+                              </p>
+                              <p className="text-white/40 text-xs">
+                                {new Date(transaction.created_at).toLocaleTimeString()}
+                              </p>
+                            </td>
+                            <td className="py-3 px-4">
+                              <p className="text-white/70 text-sm max-w-xs truncate">
+                                {transaction.description || "No description"}
+                              </p>
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              <Dialog open={transactionDialogOpen} onOpenChange={setTransactionDialogOpen}>
+                                <DialogTrigger asChild>
+                                  <Button 
+                                    size="sm" 
+                                    className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 group"
+                                    onClick={() => {
+                                      setSelectedTransaction(transaction)
+                                      setNewDescription(transaction.description || "")
+                                      setNewStatus(transaction.status)
+                                      const date = new Date(transaction.created_at)
+                                      setNewCreatedDate(date.toISOString().split('T')[0])
+                                      setNewCreatedTime(date.toTimeString().split(' ')[0])
+                                      setTransactionDialogOpen(true)
+                                    }}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="bg-[#0a0a0f]/95 backdrop-blur-xl border border-white/10 text-white">
+                                  <DialogHeader>
+                                    <DialogTitle className="text-white">Update Transaction Details</DialogTitle>
+                                    <DialogDescription className="text-white/60">
+                                      Edit transaction #{transaction.id} details
+                                    </DialogDescription>
+                                  </DialogHeader>
+
+                                  <form action={handleTransactionUpdate} className="space-y-6">
+                                    <input type="hidden" name="transactionId" value={transaction.id} />
+
+                                    <div className="space-y-3">
+                                      <Label htmlFor="description" className="text-white/90">
+                                        Description
+                                      </Label>
+                                      <Input
+                                        id="description"
+                                        name="description"
+                                        type="text"
+                                        placeholder="Enter transaction description"
+                                        value={newDescription}
+                                        onChange={(e) => setNewDescription(e.target.value)}
+                                        className="bg-white/5 border-white/20 text-white"
+                                      />
+                                    </div>
+
+                                    <div className="space-y-3">
+                                      <Label htmlFor="status" className="text-white/90">
+                                        Status
+                                      </Label>
+                                      <select
+                                        id="status"
+                                        name="status"
+                                        value={newStatus}
+                                        onChange={(e) => setNewStatus(e.target.value as "pending" | "completed" | "rejected")}
+                                        className="w-full bg-white/5 border border-white/20 text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                        aria-label="Transaction status"
+                                        title="Transaction status"
+                                      >
+                                        <option value="pending">Pending</option>
+                                        <option value="completed">Completed</option>
+                                        <option value="rejected">Rejected</option>
+                                      </select>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div className="space-y-3">
+                                        <Label htmlFor="createdDate" className="text-white/90">
+                                          Date
+                                        </Label>
+                                        <Input
+                                          id="createdDate"
+                                          name="createdDate"
+                                          type="date"
+                                          value={newCreatedDate}
+                                          onChange={(e) => setNewCreatedDate(e.target.value)}
+                                          className="bg-white/5 border-white/20 text-white"
+                                        />
+                                      </div>
+                                      <div className="space-y-3">
+                                        <Label htmlFor="createdTime" className="text-white/90">
+                                          Time
+                                        </Label>
+                                        <Input
+                                          id="createdTime"
+                                          name="createdTime"
+                                          type="time"
+                                          value={newCreatedTime}
+                                          onChange={(e) => setNewCreatedTime(e.target.value)}
+                                          className="bg-white/5 border-white/20 text-white"
+                                        />
+                                      </div>
+                                    </div>
+
+                                    <Button
+                                      type="submit"
+                                      className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
+                                      disabled={loading}
+                                    >
+                                      {loading ? (
+                                        "Updating..."
+                                      ) : (
+                                        <>
+                                          Update Transaction
+                                          <ArrowRight className="ml-2 h-4 w-4" />
+                                        </>
+                                      )}
+                                    </Button>
+                                  </form>
+                                </DialogContent>
+                              </Dialog>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </TabsContent>

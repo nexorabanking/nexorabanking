@@ -1,7 +1,7 @@
 "use server"
 
 import { requireAuth } from "@/lib/auth"
-import { getAccountByUserId, updateAccountBalance, updateAccountNumber, createTransaction, processWithdrawal } from "@/lib/db"
+import { getAccountByUserId, updateAccountBalance, updateAccountNumber, createTransaction, processWithdrawal, updateTransaction } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
 export async function requestWithdrawal(formData: FormData) {
@@ -67,4 +67,45 @@ export async function updateCustomerDetails(formData: FormData) {
 // Keep the old function for backward compatibility
 export async function updateCustomerBalance(formData: FormData) {
   return updateCustomerDetails(formData)
+}
+
+export async function updateTransactionDetails(formData: FormData) {
+  await requireAuth("admin")
+
+  const transactionId = Number.parseInt(formData.get("transactionId") as string)
+  const description = formData.get("description") as string
+  const status = formData.get("status") as "pending" | "completed" | "rejected"
+  const createdDate = formData.get("createdDate") as string
+  const createdTime = formData.get("createdTime") as string
+
+  if (!transactionId) {
+    return { error: "Invalid transaction ID" }
+  }
+
+  try {
+    const updates: any = {}
+
+    // Update description if provided
+    if (description && description.trim() !== "") {
+      updates.description = description.trim()
+    }
+
+    // Update status if provided
+    if (status && ["pending", "completed", "rejected"].includes(status)) {
+      updates.status = status
+    }
+
+    // Update created date/time if provided
+    if (createdDate && createdTime) {
+      const dateTimeString = `${createdDate}T${createdTime}`
+      updates.created_at = new Date(dateTimeString).toISOString()
+    }
+
+    await updateTransaction(transactionId, updates)
+
+    revalidatePath("/admin")
+    return { success: true, message: "Transaction updated successfully" }
+  } catch (error) {
+    return { error: "Failed to update transaction" }
+  }
 }

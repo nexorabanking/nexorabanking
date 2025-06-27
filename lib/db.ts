@@ -303,3 +303,69 @@ export async function processWithdrawal(transactionId: number): Promise<void> {
     }
   }
 }
+
+export async function getAllTransactions(): Promise<(Transaction & { user: User; account: Account })[]> {
+  const { data: transactions, error: transactionsError } = await supabase
+    .from('transactions')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (transactionsError || !transactions) {
+    throw new Error('Failed to fetch transactions')
+  }
+
+  // Get all unique account IDs
+  const accountIds = [...new Set((transactions as Transaction[]).map(t => t.account_id))]
+
+  // Get accounts for these transactions
+  const { data: accounts, error: accountsError } = await supabase
+    .from('accounts')
+    .select('*')
+    .in('id', accountIds)
+
+  if (accountsError || !accounts) {
+    throw new Error('Failed to fetch accounts')
+  }
+
+  // Get all unique user IDs
+  const userIds = [...new Set((accounts as Account[]).map(a => a.user_id))]
+
+  // Get users for these accounts
+  const { data: users, error: usersError } = await supabase
+    .from('users')
+    .select('*')
+    .in('id', userIds)
+
+  if (usersError || !users) {
+    throw new Error('Failed to fetch users')
+  }
+
+  return (transactions as Transaction[]).map(transaction => {
+    const account = (accounts as Account[]).find(a => a.id === transaction.account_id)!
+    const user = (users as User[]).find(u => u.id === account.user_id)!
+    return {
+      ...transaction,
+      user,
+      account
+    }
+  }) as (Transaction & { user: User; account: Account })[]
+}
+
+export async function updateTransaction(
+  transactionId: number,
+  updates: {
+    description?: string
+    created_at?: string
+    processed_at?: string
+    status?: "pending" | "completed" | "rejected"
+  }
+): Promise<void> {
+  const { error } = await supabase
+    .from('transactions')
+    .update(updates)
+    .eq('id', transactionId)
+
+  if (error) {
+    throw new Error('Failed to update transaction')
+  }
+}
