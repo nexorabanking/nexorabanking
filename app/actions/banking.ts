@@ -1,7 +1,7 @@
 "use server"
 
 import { requireAuth } from "@/lib/auth"
-import { getAccountByUserId, updateAccountBalance, updateAccountNumber, updateUserEmail, createTransaction, processWithdrawal } from "@/lib/db"
+import { getAccountByUserId, updateAccountBalance, updateAccountNumber, createTransaction, processWithdrawal } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
 export async function requestWithdrawal(formData: FormData) {
@@ -36,7 +36,6 @@ export async function updateCustomerDetails(formData: FormData) {
   const accountId = Number.parseInt(formData.get("accountId") as string)
   const userId = Number.parseInt(formData.get("userId") as string)
   const newBalance = formData.get("balance") as string
-  const newEmail = formData.get("email") as string
   const newAccountNumber = formData.get("accountNumber") as string
 
   if (!accountId || !userId) {
@@ -51,11 +50,6 @@ export async function updateCustomerDetails(formData: FormData) {
         await updateAccountBalance(accountId, balanceValue)
         await createTransaction(accountId, "admin_adjustment", balanceValue, "Admin balance adjustment")
       }
-    }
-
-    // Update email if provided
-    if (newEmail && newEmail.trim() !== "") {
-      await updateUserEmail(userId, newEmail.trim())
     }
 
     // Update account number if provided

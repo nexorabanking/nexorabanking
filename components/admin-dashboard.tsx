@@ -57,13 +57,13 @@ interface AdminDashboardProps {
 export function AdminDashboard({ customers }: AdminDashboardProps) {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [newBalance, setNewBalance] = useState("")
-  const [newEmail, setNewEmail] = useState("")
   const [newAccountNumber, setNewAccountNumber] = useState("")
   const [message, setMessage] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("dashboard")
   const [searchQuery, setSearchQuery] = useState("")
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   async function handleCustomerUpdate(formData: FormData) {
     setLoading(true)
@@ -77,9 +77,9 @@ export function AdminDashboard({ customers }: AdminDashboardProps) {
     } else if (result?.success) {
       setMessage("Customer details updated successfully")
       setNewBalance("")
-      setNewEmail("")
       setNewAccountNumber("")
       setSelectedCustomer(null)
+      setDialogOpen(false)
     }
 
     setLoading(false)
@@ -328,13 +328,13 @@ export function AdminDashboard({ customers }: AdminDashboardProps) {
                             </Badge>
                           </td>
                           <td className="py-3 px-4 text-right">
-                            <Dialog>
+                            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                               <DialogTrigger asChild>
                                   <Button size="sm" className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 group" onClick={() => {
                                     setSelectedCustomer(customer)
                                     setNewBalance(customer.account.balance.toString())
-                                    setNewEmail(customer.email)
                                     setNewAccountNumber(customer.account.account_number)
+                                    setDialogOpen(true)
                                   }}>
                                   <Edit className="h-4 w-4 mr-2" />
                                   Edit
@@ -351,21 +351,6 @@ export function AdminDashboard({ customers }: AdminDashboardProps) {
                                 <form action={handleCustomerUpdate} className="space-y-6">
                                   <input type="hidden" name="accountId" value={customer.account.id} />
                                   <input type="hidden" name="userId" value={customer.id} />
-
-                                  <div className="space-y-3">
-                                    <Label htmlFor="email" className="text-white/90">
-                                      Email
-                                    </Label>
-                                    <Input
-                                      id="email"
-                                      name="email"
-                                      type="email"
-                                      placeholder="Enter new email"
-                                      value={newEmail}
-                                      onChange={(e) => setNewEmail(e.target.value)}
-                                      className="bg-white/5 border-white/20 text-white pl-8"
-                                    />
-                                  </div>
 
                                   <div className="space-y-3">
                                     <Label htmlFor="accountNumber" className="text-white/90">
@@ -587,13 +572,13 @@ export function AdminDashboard({ customers }: AdminDashboardProps) {
                               <Button size="sm" className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 group">
                                   <Eye className="h-4 w-4" />
                                 </Button>
-                                <Dialog>
+                                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                                   <DialogTrigger asChild>
                                   <Button size="sm" className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 group" onClick={() => {
                                         setSelectedCustomer(customer)
                                         setNewBalance(customer.account.balance.toString())
-                                        setNewEmail(customer.email)
                                         setNewAccountNumber(customer.account.account_number)
+                                        setDialogOpen(true)
                                       }}
                                     >
                                       <Edit className="h-4 w-4" />
@@ -610,21 +595,6 @@ export function AdminDashboard({ customers }: AdminDashboardProps) {
                                     <form action={handleCustomerUpdate} className="space-y-6">
                                       <input type="hidden" name="accountId" value={customer.account.id} />
                                       <input type="hidden" name="userId" value={customer.id} />
-
-                                      <div className="space-y-3">
-                                        <Label htmlFor="email" className="text-white/90">
-                                          Email
-                                        </Label>
-                                        <Input
-                                          id="email"
-                                          name="email"
-                                          type="email"
-                                          placeholder="Enter new email"
-                                          value={newEmail}
-                                          onChange={(e) => setNewEmail(e.target.value)}
-                                          className="bg-white/5 border-white/20 text-white pl-8"
-                                        />
-                                      </div>
 
                                       <div className="space-y-3">
                                         <Label htmlFor="accountNumber" className="text-white/90">
