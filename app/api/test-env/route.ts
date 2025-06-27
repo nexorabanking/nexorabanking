@@ -20,7 +20,7 @@ export async function GET(request: Request) {
   const allowOTPTesting = !isProduction || hasValidSecret || isTestEmail
 
   // OTP testing actions
-  if (action && action.startsWith('otp') && email) {
+  if (action && (action === 'send-otp' || action === 'verify-otp' || action === 'otp-status' || action === 'test-otp') && email) {
     if (!allowOTPTesting) {
       return NextResponse.json({ 
         error: 'OTP testing not allowed in production without valid secret or test email',
