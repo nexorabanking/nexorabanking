@@ -183,6 +183,28 @@ export async function updateAccountBalance(accountId: number, newBalance: number
   }
 }
 
+export async function updateAccountNumber(accountId: number, newAccountNumber: string): Promise<void> {
+  const { error } = await supabase
+    .from('accounts')
+    .update({ account_number: newAccountNumber })
+    .eq('id', accountId)
+
+  if (error) {
+    throw new Error('Failed to update account number')
+  }
+}
+
+export async function updateUserEmail(userId: number, newEmail: string): Promise<void> {
+  const { error } = await supabase
+    .from('users')
+    .update({ email: newEmail })
+    .eq('id', userId)
+
+  if (error) {
+    throw new Error('Failed to update user email')
+  }
+}
+
 export async function createTransaction(
   accountId: number,
   type: Transaction["type"],

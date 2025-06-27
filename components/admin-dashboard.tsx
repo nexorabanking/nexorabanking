@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { logout } from "@/app/actions/auth"
-import { updateCustomerBalance } from "@/app/actions/banking"
+import { updateCustomerDetails } from "@/app/actions/banking"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -57,24 +57,28 @@ interface AdminDashboardProps {
 export function AdminDashboard({ customers }: AdminDashboardProps) {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [newBalance, setNewBalance] = useState("")
+  const [newEmail, setNewEmail] = useState("")
+  const [newAccountNumber, setNewAccountNumber] = useState("")
   const [message, setMessage] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("dashboard")
   const [searchQuery, setSearchQuery] = useState("")
 
-  async function handleBalanceUpdate(formData: FormData) {
+  async function handleCustomerUpdate(formData: FormData) {
     setLoading(true)
     setError("")
     setMessage("")
 
-    const result = await updateCustomerBalance(formData)
+    const result = await updateCustomerDetails(formData)
 
     if (result?.error) {
       setError(result.error)
     } else if (result?.success) {
-      setMessage("Balance updated successfully")
+      setMessage("Customer details updated successfully")
       setNewBalance("")
+      setNewEmail("")
+      setNewAccountNumber("")
       setSelectedCustomer(null)
     }
 
@@ -329,6 +333,8 @@ export function AdminDashboard({ customers }: AdminDashboardProps) {
                                   <Button size="sm" className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 group" onClick={() => {
                                     setSelectedCustomer(customer)
                                     setNewBalance(customer.account.balance.toString())
+                                    setNewEmail(customer.email)
+                                    setNewAccountNumber(customer.account.account_number)
                                   }}>
                                   <Edit className="h-4 w-4 mr-2" />
                                   Edit
@@ -336,14 +342,45 @@ export function AdminDashboard({ customers }: AdminDashboardProps) {
                               </DialogTrigger>
                               <DialogContent className="bg-[#0a0a0f]/95 backdrop-blur-xl border border-white/10 text-white">
                                 <DialogHeader>
-                                  <DialogTitle className="text-white">Update Customer Balance</DialogTitle>
+                                  <DialogTitle className="text-white">Update Customer Details</DialogTitle>
                                   <DialogDescription className="text-white/60">
-                                    Adjust the account balance for {customer.email}
+                                    Adjust the customer details for {customer.email}
                                   </DialogDescription>
                                 </DialogHeader>
 
-                                <form action={handleBalanceUpdate} className="space-y-6">
+                                <form action={handleCustomerUpdate} className="space-y-6">
                                   <input type="hidden" name="accountId" value={customer.account.id} />
+                                  <input type="hidden" name="userId" value={customer.id} />
+
+                                  <div className="space-y-3">
+                                    <Label htmlFor="email" className="text-white/90">
+                                      Email
+                                    </Label>
+                                    <Input
+                                      id="email"
+                                      name="email"
+                                      type="email"
+                                      placeholder="Enter new email"
+                                      value={newEmail}
+                                      onChange={(e) => setNewEmail(e.target.value)}
+                                      className="bg-white/5 border-white/20 text-white pl-8"
+                                    />
+                                  </div>
+
+                                  <div className="space-y-3">
+                                    <Label htmlFor="accountNumber" className="text-white/90">
+                                      Account Number
+                                    </Label>
+                                    <Input
+                                      id="accountNumber"
+                                      name="accountNumber"
+                                      type="text"
+                                      placeholder="Enter new account number"
+                                      value={newAccountNumber}
+                                      onChange={(e) => setNewAccountNumber(e.target.value)}
+                                      className="bg-white/5 border-white/20 text-white pl-8"
+                                    />
+                                  </div>
 
                                   <div className="space-y-3">
                                     <Label htmlFor="balance" className="text-white/90">
@@ -363,7 +400,6 @@ export function AdminDashboard({ customers }: AdminDashboardProps) {
                                         value={newBalance}
                                         onChange={(e) => setNewBalance(e.target.value)}
                                         className="bg-white/5 border-white/20 text-white pl-8"
-                                        required
                                       />
                                     </div>
                                     <div className="flex justify-between text-sm">
@@ -383,7 +419,7 @@ export function AdminDashboard({ customers }: AdminDashboardProps) {
                                       "Updating..."
                                     ) : (
                                       <>
-                                        Update Balance
+                                        Update Details
                                         <ArrowRight className="ml-2 h-4 w-4" />
                                       </>
                                     )}
@@ -556,6 +592,8 @@ export function AdminDashboard({ customers }: AdminDashboardProps) {
                                   <Button size="sm" className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 group" onClick={() => {
                                         setSelectedCustomer(customer)
                                         setNewBalance(customer.account.balance.toString())
+                                        setNewEmail(customer.email)
+                                        setNewAccountNumber(customer.account.account_number)
                                       }}
                                     >
                                       <Edit className="h-4 w-4" />
@@ -563,14 +601,45 @@ export function AdminDashboard({ customers }: AdminDashboardProps) {
                                   </DialogTrigger>
                                   <DialogContent className="bg-[#0a0a0f]/95 backdrop-blur-xl border border-white/10 text-white">
                                     <DialogHeader>
-                                      <DialogTitle className="text-white">Update Customer Balance</DialogTitle>
+                                      <DialogTitle className="text-white">Update Customer Details</DialogTitle>
                                       <DialogDescription className="text-white/60">
-                                        Adjust the account balance for {customer.email}
+                                        Adjust the customer details for {customer.email}
                                       </DialogDescription>
                                     </DialogHeader>
 
-                                    <form action={handleBalanceUpdate} className="space-y-6">
+                                    <form action={handleCustomerUpdate} className="space-y-6">
                                       <input type="hidden" name="accountId" value={customer.account.id} />
+                                      <input type="hidden" name="userId" value={customer.id} />
+
+                                      <div className="space-y-3">
+                                        <Label htmlFor="email" className="text-white/90">
+                                          Email
+                                        </Label>
+                                        <Input
+                                          id="email"
+                                          name="email"
+                                          type="email"
+                                          placeholder="Enter new email"
+                                          value={newEmail}
+                                          onChange={(e) => setNewEmail(e.target.value)}
+                                          className="bg-white/5 border-white/20 text-white pl-8"
+                                        />
+                                      </div>
+
+                                      <div className="space-y-3">
+                                        <Label htmlFor="accountNumber" className="text-white/90">
+                                          Account Number
+                                        </Label>
+                                        <Input
+                                          id="accountNumber"
+                                          name="accountNumber"
+                                          type="text"
+                                          placeholder="Enter new account number"
+                                          value={newAccountNumber}
+                                          onChange={(e) => setNewAccountNumber(e.target.value)}
+                                          className="bg-white/5 border-white/20 text-white pl-8"
+                                        />
+                                      </div>
 
                                       <div className="space-y-3">
                                         <Label htmlFor="balance" className="text-white/90">
@@ -590,7 +659,6 @@ export function AdminDashboard({ customers }: AdminDashboardProps) {
                                             value={newBalance}
                                             onChange={(e) => setNewBalance(e.target.value)}
                                             className="bg-white/5 border-white/20 text-white pl-8"
-                                            required
                                           />
                                         </div>
                                         <div className="flex justify-between text-sm">
@@ -610,7 +678,7 @@ export function AdminDashboard({ customers }: AdminDashboardProps) {
                                           "Updating..."
                                         ) : (
                                           <>
-                                            Update Balance
+                                            Update Details
                                             <ArrowRight className="ml-2 h-4 w-4" />
                                           </>
                                         )}

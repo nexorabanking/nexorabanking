@@ -1,7 +1,7 @@
 "use server"
 
 import { requireAuth } from "@/lib/auth"
-import { getAccountByUserId, updateAccountBalance, createTransaction, processWithdrawal } from "@/lib/db"
+import { getAccountByUserId, updateAccountBalance, updateAccountNumber, updateUserEmail, createTransaction, processWithdrawal } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
 export async function requestWithdrawal(formData: FormData) {
@@ -30,19 +30,47 @@ export async function requestWithdrawal(formData: FormData) {
   return { success: true, message: "Withdrawal processed successfully" }
 }
 
-export async function updateCustomerBalance(formData: FormData) {
+export async function updateCustomerDetails(formData: FormData) {
   await requireAuth("admin")
 
   const accountId = Number.parseInt(formData.get("accountId") as string)
-  const newBalance = Number.parseFloat(formData.get("balance") as string)
+  const userId = Number.parseInt(formData.get("userId") as string)
+  const newBalance = formData.get("balance") as string
+  const newEmail = formData.get("email") as string
+  const newAccountNumber = formData.get("accountNumber") as string
 
-  if (!accountId || isNaN(newBalance) || newBalance < 0) {
-    return { error: "Invalid account ID or balance" }
+  if (!accountId || !userId) {
+    return { error: "Invalid account or user ID" }
   }
 
-  await updateAccountBalance(accountId, newBalance)
-  await createTransaction(accountId, "admin_adjustment", newBalance, "Admin balance adjustment")
+  try {
+    // Update balance if provided
+    if (newBalance && newBalance.trim() !== "") {
+      const balanceValue = Number.parseFloat(newBalance)
+      if (!isNaN(balanceValue) && balanceValue >= 0) {
+        await updateAccountBalance(accountId, balanceValue)
+        await createTransaction(accountId, "admin_adjustment", balanceValue, "Admin balance adjustment")
+      }
+    }
 
-  revalidatePath("/admin")
-  return { success: true, message: "Balance updated successfully" }
+    // Update email if provided
+    if (newEmail && newEmail.trim() !== "") {
+      await updateUserEmail(userId, newEmail.trim())
+    }
+
+    // Update account number if provided
+    if (newAccountNumber && newAccountNumber.trim() !== "") {
+      await updateAccountNumber(accountId, newAccountNumber.trim())
+    }
+
+    revalidatePath("/admin")
+    return { success: true, message: "Customer details updated successfully" }
+  } catch (error) {
+    return { error: "Failed to update customer details" }
+  }
+}
+
+// Keep the old function for backward compatibility
+export async function updateCustomerBalance(formData: FormData) {
+  return updateCustomerDetails(formData)
 }
