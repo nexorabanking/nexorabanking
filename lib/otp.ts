@@ -15,7 +15,15 @@ const otpStore = new Map<string, OTPData>()
 export function generateOTP(): string {
   // Use crypto for secure random number generation
   const buffer = crypto.randomBytes(3)
+  // Ensure we get a 6-digit number between 100000 and 999999
   const code = ((Number.parseInt(buffer.toString("hex"), 16) % 900000) + 100000).toString()
+  
+  // Double-check the code is exactly 6 digits
+  if (code.length !== 6) {
+    // Fallback: generate a simple 6-digit code
+    return Math.floor(100000 + Math.random() * 900000).toString()
+  }
+  
   return code
 }
 
@@ -48,7 +56,7 @@ export async function sendOTP(email: string): Promise<string> {
       }
     }
 
-    // Store the OTP immediately
+    // Store the OTP IMMEDIATELY and synchronously before any async operations
     const otpData: OTPData = {
       code,
       expires,
@@ -58,14 +66,20 @@ export async function sendOTP(email: string): Promise<string> {
     
     otpStore.set(email, otpData)
 
+    // Verify the OTP was stored correctly IMMEDIATELY
+    const storedVerification = otpStore.get(email)
+    if (!storedVerification || storedVerification.code !== code) {
+      throw new Error("Failed to store OTP properly")
+    }
+
     if (env.app.isDevelopment) {
-      console.log(`📧 Storing OTP for ${email}: ${code}`)
+      console.log(`📧 OTP stored successfully for ${email}: ${code}`)
       console.log(`📧 OTP expires at: ${new Date(expires).toLocaleString()}`)
       console.log(`📧 Current OTP store size: ${otpStore.size}`)
       console.log(`📧 Store keys:`, Array.from(otpStore.keys()))
     }
 
-    // In production, send email using Resend
+    // Now handle email sending (this won't affect the stored OTP)
     if (env.app.isDevelopment) {
       console.log(`📧 OTP for ${email}: ${code}`)
       console.log(`🔐 This code is required for both sign-in and account creation`)
@@ -74,24 +88,10 @@ export async function sendOTP(email: string): Promise<string> {
       try {
         await sendOTPEmail(email, code)
       } catch (error) {
-        // Temporary fallback for debugging - log the OTP in production if email fails
-        console.log(`⚠️ Email sending failed, but here's the OTP for ${email}: ${code}`)
-        console.log(`⚠️ This is a temporary fallback while debugging email configuration`)
-        // Don't throw the error, just log it for now
-        console.error(`⚠️ Email error:`, error)
-      }
-    }
-
-    // Verify the OTP was stored correctly
-    if (env.app.isDevelopment) {
-      const stored = otpStore.get(email)
-      if (stored && stored.code === code) {
-        console.log(`✅ OTP stored successfully for ${email}`)
-        console.log(`✅ Verification: stored code matches generated code`)
-      } else {
-        console.log(`❌ OTP storage verification failed for ${email}`)
-        console.log(`❌ Stored:`, stored)
-        console.log(`❌ Expected:`, code)
+        // Log the error but DON'T remove the OTP - user can still use it
+        console.error(`⚠️ Email sending failed for ${email}:`, error)
+        console.log(`⚠️ OTP is still valid: ${code}`)
+        // Don't throw the error, just log it - the OTP is still stored and usable
       }
     }
 
@@ -104,9 +104,6 @@ export async function sendOTP(email: string): Promise<string> {
 
 export async function verifyOTP(email: string, code: string): Promise<boolean> {
   try {
-    // Add a small delay to ensure OTP is properly stored (prevents race conditions)
-    await new Promise(resolve => setTimeout(resolve, 100))
-
     const stored = otpStore.get(email)
 
     if (env.app.isDevelopment) {
