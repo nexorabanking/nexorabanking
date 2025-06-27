@@ -15,8 +15,22 @@ const serverStartTime = Date.now()
 
 console.log(`🚀 OTP System initialized - Instance: ${serverInstanceId} - Start time: ${new Date(serverStartTime).toISOString()}`)
 
-// Use Map instead of plain object for better performance and reliability
-const otpStore = new Map<string, OTPData>()
+// Global OTP store that persists across server restarts (in development)
+// In production, this should be replaced with a proper database
+declare global {
+  var __otpStore: Map<string, OTPData> | undefined
+}
+
+// Use global store if available, otherwise create new
+const otpStore = global.__otpStore || new Map<string, OTPData>()
+
+// Initialize global store if not exists
+if (!global.__otpStore) {
+  global.__otpStore = otpStore
+  console.log(`🔍 [GLOBAL] Initialized global OTP store`)
+} else {
+  console.log(`🔍 [GLOBAL] Using existing global OTP store with ${otpStore.size} entries`)
+}
 
 // Debug function to track OTP store changes
 function logOTPStoreChange(action: string, email: string, details?: any) {
@@ -35,17 +49,20 @@ const originalClear = otpStore.clear.bind(otpStore)
 
 otpStore.set = function(key: string, value: OTPData) {
   logOTPStoreChange('SET', key, { code: value.code, expires: new Date(value.expires).toISOString() })
-  return originalSet(key, value)
+  const result = originalSet(key, value)
+  return result
 }
 
 otpStore.delete = function(key: string) {
   logOTPStoreChange('DELETE', key)
-  return originalDelete(key)
+  const result = originalDelete(key)
+  return result
 }
 
 otpStore.clear = function() {
   logOTPStoreChange('CLEAR', 'ALL')
-  return originalClear()
+  const result = originalClear()
+  return result
 }
 
 export function generateOTP(): string {
