@@ -28,32 +28,44 @@ export function generateOTP(): string {
 }
 
 export async function sendOTP(email: string): Promise<string> {
+  const requestId = Math.random().toString(36).substring(7)
+  console.log(`🔍 [${requestId}] === OTP REQUEST START ===`)
+  console.log(`🔍 [${requestId}] Email: ${email}`)
+  console.log(`🔍 [${requestId}] Timestamp: ${new Date().toISOString()}`)
+  
   try {
     const code = generateOTP()
     const expires = Date.now() + 5 * 60 * 1000 // 5 minutes
     const createdAt = Date.now()
 
-    if (env.app.isDevelopment) {
-      console.log(`🚀 Starting OTP process for ${email}`)
-      console.log(`📧 Generated code: ${code}`)
-    }
+    console.log(`🔍 [${requestId}] Generated OTP: ${code}`)
+    console.log(`🔍 [${requestId}] Expires at: ${new Date(expires).toISOString()}`)
+    console.log(`🔍 [${requestId}] Created at: ${new Date(createdAt).toISOString()}`)
 
     // Check if there's an existing OTP that was sent recently (prevent spam)
     const existing = otpStore.get(email)
+    console.log(`🔍 [${requestId}] Existing OTP found: ${!!existing}`)
+    if (existing) {
+      console.log(`🔍 [${requestId}] Existing OTP details:`, {
+        code: existing.code,
+        attempts: existing.attempts,
+        createdAt: new Date(existing.createdAt).toISOString(),
+        expires: new Date(existing.expires).toISOString(),
+        timeSinceCreation: createdAt - existing.createdAt
+      })
+    }
+    
     if (existing && createdAt - existing.createdAt < 60 * 1000) {
       // 1 minute cooldown
-      if (env.app.isDevelopment) {
-        console.log(`⏰ OTP cooldown active for ${email}. Please wait before requesting a new code.`)
-      }
+      console.log(`🔍 [${requestId}] ⏰ OTP cooldown active for ${email}. Please wait before requesting a new code.`)
       throw new Error("Please wait before requesting a new verification code")
     }
 
     // Clear any existing OTP for this email to prevent conflicts
     if (existing) {
+      console.log(`🔍 [${requestId}] 🗑️ Clearing existing OTP for ${email}`)
       otpStore.delete(email)
-      if (env.app.isDevelopment) {
-        console.log(`🗑️ Cleared existing OTP for ${email}`)
-      }
+      console.log(`🔍 [${requestId}] 🗑️ Existing OTP cleared. Store size now: ${otpStore.size}`)
     }
 
     // Store the OTP IMMEDIATELY and synchronously before any async operations
@@ -64,88 +76,104 @@ export async function sendOTP(email: string): Promise<string> {
       createdAt,
     }
     
+    console.log(`🔍 [${requestId}] 📝 Storing OTP data:`, otpData)
     otpStore.set(email, otpData)
+    console.log(`🔍 [${requestId}] 📝 OTP stored. Store size: ${otpStore.size}`)
 
     // Verify the OTP was stored correctly IMMEDIATELY
     const storedVerification = otpStore.get(email)
+    console.log(`🔍 [${requestId}] 🔍 Storage verification:`, {
+      storedExists: !!storedVerification,
+      storedCode: storedVerification?.code,
+      expectedCode: code,
+      codesMatch: storedVerification?.code === code
+    })
+    
     if (!storedVerification || storedVerification.code !== code) {
+      console.log(`🔍 [${requestId}] ❌ FAILED: OTP storage verification failed`)
       throw new Error("Failed to store OTP properly")
     }
 
-    if (env.app.isDevelopment) {
-      console.log(`📧 OTP stored successfully for ${email}: ${code}`)
-      console.log(`📧 OTP expires at: ${new Date(expires).toLocaleString()}`)
-      console.log(`📧 Current OTP store size: ${otpStore.size}`)
-      console.log(`📧 Store keys:`, Array.from(otpStore.keys()))
-    }
+    console.log(`🔍 [${requestId}] ✅ OTP stored successfully for ${email}: ${code}`)
+    console.log(`🔍 [${requestId}] 📊 Current OTP store keys:`, Array.from(otpStore.keys()))
 
     // Now handle email sending (this won't affect the stored OTP)
     if (env.app.isDevelopment) {
-      console.log(`📧 OTP for ${email}: ${code}`)
-      console.log(`🔐 This code is required for both sign-in and account creation`)
+      console.log(`🔍 [${requestId}] 📧 DEVELOPMENT MODE: OTP for ${email}: ${code}`)
+      console.log(`🔍 [${requestId}] 📧 This code is required for both sign-in and account creation`)
     } else {
       // Send actual email using Resend
+      console.log(`🔍 [${requestId}] 📧 PRODUCTION MODE: Attempting to send email`)
       try {
         await sendOTPEmail(email, code)
+        console.log(`🔍 [${requestId}] 📧 Email sent successfully`)
       } catch (error) {
         // Log the error but DON'T remove the OTP - user can still use it
-        console.error(`⚠️ Email sending failed for ${email}:`, error)
-        console.log(`⚠️ OTP is still valid: ${code}`)
+        console.error(`🔍 [${requestId}] ⚠️ Email sending failed for ${email}:`, error)
+        console.log(`🔍 [${requestId}] ⚠️ OTP is still valid: ${code}`)
         // Don't throw the error, just log it - the OTP is still stored and usable
       }
     }
 
+    console.log(`🔍 [${requestId}] === OTP REQUEST END ===`)
     return code
   } catch (error) {
-    console.error("❌ Error sending OTP:", error)
+    console.error(`🔍 [${requestId}] ❌ Error sending OTP:`, error)
+    console.log(`🔍 [${requestId}] === OTP REQUEST FAILED ===`)
     throw new Error("Failed to send OTP")
   }
 }
 
 export async function verifyOTP(email: string, code: string): Promise<boolean> {
+  const verifyId = Math.random().toString(36).substring(7)
+  console.log(`🔍 [${verifyId}] === OTP VERIFICATION START ===`)
+  console.log(`🔍 [${verifyId}] Email: ${email}`)
+  console.log(`🔍 [${verifyId}] Received code: "${code}"`)
+  console.log(`🔍 [${verifyId}] Code length: ${code.length}`)
+  console.log(`🔍 [${verifyId}] Timestamp: ${new Date().toISOString()}`)
+  
   try {
     const stored = otpStore.get(email)
+    console.log(`🔍 [${verifyId}] Stored OTP exists: ${!!stored}`)
+    console.log(`🔍 [${verifyId}] Current store size: ${otpStore.size}`)
+    console.log(`🔍 [${verifyId}] Store keys:`, Array.from(otpStore.keys()))
 
-    if (env.app.isDevelopment) {
-      console.log(`🔍 Verifying OTP for ${email}`)
-      console.log(`🔍 Received code: ${code}`)
-      console.log(`🔍 Stored OTP exists: ${!!stored}`)
-      if (stored) {
-        console.log(`🔍 Stored code: ${stored.code}`)
-        console.log(`🔍 Attempts: ${stored.attempts}/3`)
-        console.log(`🔍 Expires at: ${new Date(stored.expires).toLocaleString()}`)
-      }
+    if (stored) {
+      console.log(`🔍 [${verifyId}] Stored OTP details:`, {
+        code: stored.code,
+        codeLength: stored.code.length,
+        attempts: stored.attempts,
+        createdAt: new Date(stored.createdAt).toISOString(),
+        expires: new Date(stored.expires).toISOString(),
+        isExpired: Date.now() > stored.expires
+      })
     }
 
     if (!stored) {
-      if (env.app.isDevelopment) {
-        console.log(`❌ No OTP found for ${email}`)
-        console.log(`📊 Current OTP store:`, Array.from(otpStore.keys()))
-        console.log(`📊 Store size: ${otpStore.size}`)
-      }
+      console.log(`🔍 [${verifyId}] ❌ No OTP found for ${email}`)
+      console.log(`🔍 [${verifyId}] === OTP VERIFICATION FAILED: NO OTP ===`)
       return false
     }
 
     // Check if OTP has expired
     if (Date.now() > stored.expires) {
+      console.log(`🔍 [${verifyId}] ⏰ OTP expired for ${email}`)
+      console.log(`🔍 [${verifyId}] Expired at: ${new Date(stored.expires).toISOString()}`)
+      console.log(`🔍 [${verifyId}] Current time: ${new Date().toISOString()}`)
       otpStore.delete(email)
-      if (env.app.isDevelopment) {
-        console.log(`⏰ OTP expired for ${email}`)
-        console.log(`⏰ Expired at: ${new Date(stored.expires).toLocaleString()}`)
-        console.log(`⏰ Current time: ${new Date().toLocaleString()}`)
-      }
+      console.log(`🔍 [${verifyId}] === OTP VERIFICATION FAILED: EXPIRED ===`)
       return false
     }
 
     // Increment attempt counter
     stored.attempts++
+    console.log(`🔍 [${verifyId}] Attempt counter incremented: ${stored.attempts}/3`)
 
     // Check for too many attempts
     if (stored.attempts > 3) {
+      console.log(`🔍 [${verifyId}] 🚫 Too many OTP attempts for ${email}. Attempts: ${stored.attempts}/3`)
       otpStore.delete(email)
-      if (env.app.isDevelopment) {
-        console.log(`🚫 Too many OTP attempts for ${email}. Attempts: ${stored.attempts}/3`)
-      }
+      console.log(`🔍 [${verifyId}] === OTP VERIFICATION FAILED: TOO MANY ATTEMPTS ===`)
       return false
     }
 
@@ -153,31 +181,34 @@ export async function verifyOTP(email: string, code: string): Promise<boolean> {
     const normalizedStoredCode = stored.code.trim()
     const normalizedReceivedCode = code.trim()
     
-    if (env.app.isDevelopment) {
-      console.log(`🔍 Comparing codes:`)
-      console.log(`🔍 Stored (normalized): "${normalizedStoredCode}"`)
-      console.log(`🔍 Received (normalized): "${normalizedReceivedCode}"`)
-      console.log(`🔍 Length match: ${normalizedStoredCode.length === normalizedReceivedCode.length}`)
-      console.log(`🔍 Exact match: ${normalizedStoredCode === normalizedReceivedCode}`)
-    }
+    console.log(`🔍 [${verifyId}] Code comparison:`, {
+      storedOriginal: `"${stored.code}"`,
+      storedNormalized: `"${normalizedStoredCode}"`,
+      receivedOriginal: `"${code}"`,
+      receivedNormalized: `"${normalizedReceivedCode}"`,
+      storedLength: normalizedStoredCode.length,
+      receivedLength: normalizedReceivedCode.length,
+      lengthsMatch: normalizedStoredCode.length === normalizedReceivedCode.length,
+      exactMatch: normalizedStoredCode === normalizedReceivedCode
+    })
     
     if (normalizedStoredCode !== normalizedReceivedCode) {
-      if (env.app.isDevelopment) {
-        console.log(`❌ Invalid OTP for ${email}. Attempts: ${stored.attempts}/3`)
-        console.log(`❌ Expected: "${normalizedStoredCode}", Received: "${normalizedReceivedCode}"`)
-        console.log(`❌ Code length - Expected: ${normalizedStoredCode.length}, Received: ${normalizedReceivedCode.length}`)
-      }
+      console.log(`🔍 [${verifyId}] ❌ Invalid OTP for ${email}. Attempts: ${stored.attempts}/3`)
+      console.log(`🔍 [${verifyId}] Expected: "${normalizedStoredCode}", Received: "${normalizedReceivedCode}"`)
+      console.log(`🔍 [${verifyId}] Code length - Expected: ${normalizedStoredCode.length}, Received: ${normalizedReceivedCode.length}`)
+      console.log(`🔍 [${verifyId}] === OTP VERIFICATION FAILED: INVALID CODE ===`)
       return false
     }
 
     // Success - clean up
+    console.log(`🔍 [${verifyId}] ✅ OTP verified successfully for ${email}`)
     otpStore.delete(email)
-    if (env.app.isDevelopment) {
-      console.log(`✅ OTP verified successfully for ${email}`)
-    }
+    console.log(`🔍 [${verifyId}] OTP removed from store. Store size now: ${otpStore.size}`)
+    console.log(`🔍 [${verifyId}] === OTP VERIFICATION SUCCESS ===`)
     return true
   } catch (error) {
-    console.error("❌ Error verifying OTP:", error)
+    console.error(`🔍 [${verifyId}] ❌ Error verifying OTP:`, error)
+    console.log(`🔍 [${verifyId}] === OTP VERIFICATION FAILED: ERROR ===`)
     return false
   }
 }
