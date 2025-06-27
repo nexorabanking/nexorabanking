@@ -291,8 +291,12 @@ async function sendOTPEmail(email: string, code: string): Promise<void> {
 
 // Debug function to check OTP status (development only)
 export function getOTPStatus(email: string): any {
-  if (!env.app.isDevelopment) {
-    return { error: "Debug function only available in development" }
+  const isProduction = process.env.NODE_ENV === 'production'
+  const isTestEmail = email && (email.includes('test') || email.includes('debug') || email.endsWith('.test'))
+  
+  // Allow in development or for test emails in production
+  if (isProduction && !isTestEmail) {
+    return { error: "Debug function only available in development or for test emails" }
   }
 
   const stored = otpStore.get(email)
@@ -326,8 +330,12 @@ export function getOTPStatus(email: string): any {
 
 // Test function to manually test OTP system (development only)
 export async function testOTPSystem(email: string): Promise<any> {
-  if (!env.app.isDevelopment) {
-    return { error: "Test function only available in development" }
+  const isProduction = process.env.NODE_ENV === 'production'
+  const isTestEmail = email && (email.includes('test') || email.includes('debug') || email.endsWith('.test'))
+  
+  // Allow in development or for test emails in production
+  if (isProduction && !isTestEmail) {
+    return { error: "Test function only available in development or for test emails" }
   }
 
   try {
