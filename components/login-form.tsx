@@ -15,7 +15,7 @@ export function LoginForm() {
   const [showOTP, setShowOTP] = useState(false)
   const [email, setEmail] = useState("")
   const [isLogin, setIsLogin] = useState(true)
-  const [useUsername, setUseUsername] = useState(false)
+  const [useUsername, setUseUsername] = useState(true)
 
   async function handleSubmit(formData: FormData) {
     setLoading(true)
