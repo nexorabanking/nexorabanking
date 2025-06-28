@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { Footer } from '@/components/footer'
 
 export const metadata: Metadata = {
   title: 'Nexora Banking',
@@ -22,7 +23,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body style={{ backgroundColor: '#0a0a0f', color: 'white' }}>{children}</body>
+      <body style={{ backgroundColor: '#0a0a0f', color: 'white' }}>
+        <div className="min-h-screen flex flex-col">
+          <main className="flex-1">
+            {children}
+          </main>
+          <Footer />
+        </div>
+      </body>
     </html>
   )
 }
