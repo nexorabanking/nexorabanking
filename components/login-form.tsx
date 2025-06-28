@@ -52,14 +52,14 @@ export function LoginForm() {
             <Label htmlFor="identifier" className="text-white/90 font-medium">
               {useUsername ? "Username" : "Email Address"}
             </Label>
-            <button
+            {/* <button
               type="button"
               onClick={() => setUseUsername(!useUsername)}
               className="flex items-center space-x-2 text-xs text-white/60 hover:text-white/80 transition-colors"
             >
               <ToggleLeft className="h-3 w-3" />
               <span>Use {useUsername ? "Email" : "Username"}</span>
-            </button>
+            </button> */}
           </div>
           <div className="relative">
             {useUsername ? (
