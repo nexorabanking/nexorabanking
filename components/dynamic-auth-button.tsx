@@ -9,6 +9,7 @@ interface DynamicAuthButtonProps {
     id: number
     email: string
     role: string
+    username: string
   } | null
 }
 
@@ -17,13 +18,13 @@ export function DynamicAuthButton({ user }: DynamicAuthButtonProps) {
     // User is logged in - show dashboard link and user info
     return (
       <div className="flex items-center space-x-3">
-        <div className="hidden md:flex items-center space-x-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-400 to-blue-400 flex items-center justify-center text-white font-medium">
-            {user.email.charAt(0).toUpperCase()}
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+            {user.username.charAt(0).toUpperCase()}
           </div>
-          <div className="text-right">
-            <p className="text-white text-sm font-medium">{user.email.split("@")[0]}</p>
-            <p className="text-white/50 text-xs capitalize">{user.role}</p>
+          <div className="hidden md:block">
+            <p className="text-white text-sm font-medium">{user.username}</p>
+            <p className="text-white/60 text-xs">{user.email}</p>
           </div>
         </div>
         <Link href={user.role === "admin" ? "/admin" : "/dashboard"}>

@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs'
 // Mock database functions - replace with your actual database connection
 export interface User {
   id: number
+  username: string
   email: string
   password_hash: string
   role: "customer" | "admin"
@@ -32,6 +33,7 @@ export interface Transaction {
 const users: User[] = [
   {
     id: 1,
+    username: "admin",
     email: "admin@cryptobank.com",
     password_hash: "hashed_admin_password",
     role: "admin",
@@ -39,6 +41,7 @@ const users: User[] = [
   },
   {
     id: 2,
+    username: "customer",
     email: "customer@example.com",
     password_hash: "hashed_customer_password",
     role: "customer",
@@ -86,11 +89,12 @@ export async function findUserByEmail(email: string): Promise<User | null> {
   return data as User
 }
 
-export async function createUser(email: string, passwordHash: string): Promise<User> {
+export async function createUser(username: string, email: string, passwordHash: string): Promise<User> {
   const { data: user, error: userError } = await supabase
     .from('users')
     .insert([
       {
+        username,
         email,
         password_hash: passwordHash,  // Use the already hashed password
         role: 'customer',
@@ -368,4 +372,27 @@ export async function updateTransaction(
   if (error) {
     throw new Error('Failed to update transaction')
   }
+}
+
+export async function findUserByUsername(username: string): Promise<User | null> {
+  console.log('Searching for user with username:', username)
+  
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('username', username)
+    .single()
+
+  if (error) {
+    console.log('Supabase error:', error)
+    return null
+  }
+
+  if (!data) {
+    console.log('No user found')
+    return null
+  }
+
+  console.log('User found:', { ...data, password_hash: '[REDACTED]' })
+  return data as User
 }

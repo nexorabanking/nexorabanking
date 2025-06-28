@@ -1,7 +1,7 @@
 "use server"
 
 import { redirect } from "next/navigation"
-import { findUserByEmail, createUser, verifyUser } from "@/lib/db"
+import { findUserByEmail, findUserByUsername, createUser, verifyUser } from "@/lib/db"
 import { sendOTP, verifyOTP } from "@/lib/otp"
 import { setUserToken, clearUserToken, rateLimiter } from "@/lib/auth"
 import { env } from "@/lib/env"
@@ -9,6 +9,7 @@ import bcrypt from "bcryptjs"
 
 export async function signup(formData: FormData) {
   try {
+    const username = formData.get("username") as string
     const email = formData.get("email") as string
     const password = formData.get("password") as string
 
@@ -17,8 +18,19 @@ export async function signup(formData: FormData) {
       return { error: "Too many signup attempts. Please try again later." }
     }
 
-    if (!email || !password) {
-      return { error: "Email and password are required" }
+    if (!username || !email || !password) {
+      return { error: "Username, email and password are required" }
+    }
+
+    // Username validation
+    if (username.length < 3 || username.length > 20) {
+      return { error: "Username must be between 3 and 20 characters" }
+    }
+
+    // Username format validation (alphanumeric and underscores only)
+    const usernameRegex = /^[a-zA-Z0-9_]+$/
+    if (!usernameRegex.test(username)) {
+      return { error: "Username can only contain letters, numbers, and underscores" }
     }
 
     // Email validation
@@ -32,19 +44,24 @@ export async function signup(formData: FormData) {
       return { error: "Password must be at least 8 characters long" }
     }
 
-    const existingUser = await findUserByEmail(email)
-    if (existingUser) {
+    const existingUserByEmail = await findUserByEmail(email)
+    if (existingUserByEmail) {
       return { error: "User already exists with this email" }
+    }
+
+    const existingUserByUsername = await findUserByUsername(username)
+    if (existingUserByUsername) {
+      return { error: "Username is already taken" }
     }
 
     // Hash password with configured rounds
     const passwordHash = await bcrypt.hash(password, env.security.bcryptRounds)
 
-    await createUser(email, passwordHash)
+    await createUser(username, email, passwordHash)
     await sendOTP(email)
 
     if (env.app.isDevelopment) {
-      console.log(`✅ User created successfully: ${email}`)
+      console.log(`✅ User created successfully: ${username} (${email})`)
     }
 
     return { success: true, email, isLogin: false }
@@ -56,37 +73,55 @@ export async function signup(formData: FormData) {
 
 export async function login(formData: FormData) {
   try {
-    const email = formData.get("email") as string
+    const identifier = formData.get("identifier") as string
     const password = formData.get("password") as string
 
     // Rate limiting
-    if (!rateLimiter.isAllowed(`login:${email}`)) {
+    if (!rateLimiter.isAllowed(`login:${identifier}`)) {
       return { error: "Too many login attempts. Please try again later." }
     }
 
-    if (!email || !password) {
-      return { error: "Email and password are required" }
+    if (!identifier || !password) {
+      return { error: "Identifier and password are required" }
     }
 
-    const user = await findUserByEmail(email)
+    // Determine if identifier is email or username
+    const isEmail = identifier.includes('@')
+    let user: any = null
+
+    if (isEmail) {
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(identifier)) {
+        return { error: "Please enter a valid email address" }
+      }
+      user = await findUserByEmail(identifier)
+    } else {
+      // Username validation
+      if (identifier.length < 3 || identifier.length > 20) {
+        return { error: "Username must be between 3 and 20 characters" }
+      }
+      user = await findUserByUsername(identifier)
+    }
+
     if (!user) {
-      return { error: "Invalid email or password" }
+      return { error: "Invalid credentials" }
     }
 
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password_hash)
     if (!isValidPassword) {
-      return { error: "Invalid email or password" }
+      return { error: "Invalid credentials" }
     }
 
     // Always require OTP for sign-in (enhanced security)
-    await sendOTP(email)
+    await sendOTP(user.email)
 
     if (env.app.isDevelopment) {
-      console.log(`🔐 OTP sent for login verification: ${email}`)
+      console.log(`🔐 OTP sent for login verification: ${user.username} (${user.email})`)
     }
 
-    return { requiresOTP: true, email, isLogin: true }
+    return { requiresOTP: true, email: user.email, isLogin: true }
   } catch (error) {
     console.error("❌ Login error:", error)
     return { error: "An error occurred during login. Please try again." }
@@ -123,6 +158,7 @@ export async function verifyOTPAction(formData: FormData) {
     if (user) {
       await setUserToken({
         id: user.id,
+        username: user.username,
         email: user.email,
         role: user.role,
         isVerified: true,

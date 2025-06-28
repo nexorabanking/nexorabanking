@@ -51,6 +51,7 @@ interface Transaction {
   user: {
     id: number
     email: string
+    username: string
   }
   account: {
     id: number
@@ -765,13 +766,13 @@ export function AdminDashboard({ customers, transactions }: AdminDashboardProps)
                               <p className="text-white/80 font-mono text-sm">#{transaction.id}</p>
                             </td>
                             <td className="py-3 px-4">
-                              <div className="flex items-center">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 flex items-center justify-center text-white font-medium mr-3">
-                                  {transaction.user.email.charAt(0).toUpperCase()}
+                              <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                  {transaction.user.username.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
-                                  <p className="text-white font-medium">{transaction.user.email}</p>
-                                  <p className="text-white/40 text-xs">ID: {transaction.user.id}</p>
+                                  <p className="text-white font-medium">{transaction.user.username}</p>
+                                  <p className="text-white/60 text-xs">{transaction.user.email}</p>
                                 </div>
                               </div>
                             </td>

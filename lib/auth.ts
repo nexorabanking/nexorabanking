@@ -5,6 +5,7 @@ import { sign, verify } from "jsonwebtoken"
 
 export interface User {
   id: number
+  username: string
   email: string
   role: "customer" | "admin"
   isVerified: boolean
@@ -59,6 +60,7 @@ export async function getUser(): Promise<User | null> {
 
     return {
       id: payload.id,
+      username: payload.username,
       email: payload.email,
       role: payload.role,
       isVerified: payload.isVerified,

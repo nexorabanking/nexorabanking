@@ -56,6 +56,27 @@ export function SignupForm() {
 
       <div className="space-y-4">
         <div className="space-y-2">
+          <Label htmlFor="signup-username" className="text-white/90 font-medium">
+            Username
+          </Label>
+          <div className="relative">
+            <UserPlus className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/90" />
+            <Input
+              id="signup-username"
+              name="username"
+              type="text"
+              placeholder="Choose a username"
+              className="input-modern pl-12 text-[#9333ea] md:text-white/90"
+              required
+              minLength={3}
+              maxLength={20}
+              pattern="[a-zA-Z0-9_]+"
+              title="Username can only contain letters, numbers, and underscores"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="signup-email" className="text-white/90 font-medium">
             Email Address
           </Label>

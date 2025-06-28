@@ -33,7 +33,7 @@ import {
 } from "lucide-react"
 
 interface CustomerDashboardProps {
-  user: { id: number; email: string; role: string }
+  user: { id: number; email: string; role: string; username: string }
   account: { id: number; balance: number; account_number: string }
   transactions: Array<{
     id: number
@@ -299,12 +299,12 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                 <Settings className="h-5 w-5 text-white/70" />
               </button>
               <div className="hidden md:flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-400 to-blue-400 flex items-center justify-center text-white font-medium">
-                  {user.email.charAt(0).toUpperCase()}
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                  {user.username.charAt(0).toUpperCase()}
                 </div>
-                <div className="text-right">
-                  <p className="text-white text-sm font-medium">{user.email.split("@")[0]}</p>
-                  <p className="text-white/50 text-xs">Customer</p>
+                <div>
+                  <p className="text-white text-sm font-medium">{user.username}</p>
+                  <p className="text-white/60 text-xs">{user.email}</p>
                 </div>
               </div>
               <form action={logout}>
@@ -328,7 +328,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
       <div className="relative z-10 container mx-auto px-6 py-8">
         {/* Welcome Banner */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">Welcome back, {user.email.split("@")[0]}</h1>
+          <h1 className="text-3xl font-bold text-white">Welcome back, {user.username}</h1>
           <p className="text-white/60">Here's what's happening with your account today.</p>
         </div>
 

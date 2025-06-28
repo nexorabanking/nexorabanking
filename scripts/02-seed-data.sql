@@ -1,11 +1,11 @@
 -- Insert admin user (password: admin123)
-INSERT INTO users (email, password_hash, role, is_verified) 
-VALUES ('admin@cryptobank.com', '$2a$10$rOzJqQZQXQXQXQXQXQXQXu', 'admin', TRUE)
+INSERT INTO users (username, email, password_hash, role, is_verified) 
+VALUES ('admin', 'admin@cryptobank.com', '$2a$10$rOzJqQZQXQXQXQXQXQXQXu', 'admin', TRUE)
 ON CONFLICT (email) DO NOTHING;
 
 -- Insert sample customer (password: customer123)
-INSERT INTO users (email, password_hash, role, is_verified) 
-VALUES ('customer@example.com', '$2a$10$rOzJqQZQXQXQXQXQXQXQXu', 'customer', TRUE)
+INSERT INTO users (username, email, password_hash, role, is_verified) 
+VALUES ('customer', 'customer@example.com', '$2a$10$rOzJqQZQXQXQXQXQXQXQXu', 'customer', TRUE)
 ON CONFLICT (email) DO NOTHING;
 
 -- Create accounts for users

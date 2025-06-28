@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { OTPVerification } from "./otp-verification"
-import { Mail, Lock, ArrowRight, Shield } from "lucide-react"
+import { Mail, Lock, ArrowRight, Shield, User, ToggleLeft } from "lucide-react"
 
 export function LoginForm() {
   const [error, setError] = useState("")
@@ -15,6 +15,7 @@ export function LoginForm() {
   const [showOTP, setShowOTP] = useState(false)
   const [email, setEmail] = useState("")
   const [isLogin, setIsLogin] = useState(true)
+  const [useUsername, setUseUsername] = useState(false)
 
   async function handleSubmit(formData: FormData) {
     setLoading(true)
@@ -47,16 +48,30 @@ export function LoginForm() {
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-white/90 font-medium">
-            Email Address
-          </Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="identifier" className="text-white/90 font-medium">
+              {useUsername ? "Username" : "Email Address"}
+            </Label>
+            <button
+              type="button"
+              onClick={() => setUseUsername(!useUsername)}
+              className="flex items-center space-x-2 text-xs text-white/60 hover:text-white/80 transition-colors"
+            >
+              <ToggleLeft className="h-3 w-3" />
+              <span>Use {useUsername ? "Email" : "Username"}</span>
+            </button>
+          </div>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white" />
+            {useUsername ? (
+              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white" />
+            ) : (
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white" />
+            )}
             <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="Enter your email"
+              id="identifier"
+              name="identifier"
+              type={useUsername ? "text" : "email"}
+              placeholder={useUsername ? "Enter your username" : "Enter your email"}
               className="input-modern pl-12 text-[#9333ea] md:text-white"
               required
             />
