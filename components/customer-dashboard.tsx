@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { logout } from "@/app/actions/auth"
 import { requestWithdrawal } from "@/app/actions/banking"
+import { useInactivityTimeout } from "@/hooks/use-inactivity-timeout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
@@ -33,7 +34,7 @@ import {
 } from "lucide-react"
 
 interface CustomerDashboardProps {
-  user: { id: number; email: string; role: string; username: string }
+  user: { id: number; email: string; role: string; username?: string }
   account: { id: number; balance: number; account_number: string }
   transactions: Array<{
     id: number
@@ -66,7 +67,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
   const [livePrices, setLivePrices] = useState<LivePriceData[]>([])
   const [pricesLoading, setPricesLoading] = useState(true)
 
-  // List of major American banks
+  // List of major American banks and credit unions
   const americanBanks = [
     { value: "chase", label: "Chase Bank" },
     { value: "bank-of-america", label: "Bank of America" },
@@ -88,6 +89,41 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
     { value: "citizens-bank", label: "Citizens Bank" },
     { value: "comerica", label: "Comerica Bank" },
     { value: "bmo-harris", label: "BMO Harris Bank" },
+    { value: "navy-federal", label: "Navy Federal Credit Union" },
+    { value: "state-employees", label: "State Employees' Credit Union" },
+    { value: "penfed", label: "PenFed Credit Union" },
+    { value: "schoolsfirst", label: "SchoolsFirst Federal Credit Union" },
+    { value: "america-first", label: "America First Credit Union" },
+    { value: "golden-1", label: "Golden 1 Credit Union" },
+    { value: "becu", label: "Boeing Employees Credit Union (BECU)" },
+    { value: "alliant", label: "Alliant Credit Union" },
+    { value: "mountain-america", label: "Mountain America Credit Union" },
+    { value: "first-technology", label: "First Technology Federal Credit Union" },
+    { value: "suncoast", label: "Suncoast Credit Union" },
+    { value: "san-diego-county", label: "San Diego County Credit Union" },
+    { value: "security-service", label: "Security Service Federal Credit Union" },
+    { value: "alaska-usa", label: "Alaska USA Federal Credit Union" },
+    { value: "bowater", label: "Bowater Credit Union" },
+    { value: "delta-community", label: "Delta Community Credit Union" },
+    { value: "american-airlines", label: "American Airlines Federal Credit Union" },
+    { value: "teachers-federal", label: "Teachers Federal Credit Union" },
+    { value: "vystar", label: "VyStar Credit Union" },
+    { value: "visions", label: "Visions Federal Credit Union" },
+    { value: "michigan-state", label: "Michigan State University Federal Credit Union" },
+    { value: "truwest", label: "TruWest Credit Union" },
+    { value: "nasa-federal", label: "NASA Federal Credit Union" },
+    { value: "georgias-own", label: "Georgia's Own Credit Union" },
+    { value: "psecu", label: "PSECU (Pennsylvania State Employees Credit Union)" },
+    { value: "desert-financial", label: "Desert Financial Credit Union" },
+    { value: "tower-federal", label: "Tower Federal Credit Union" },
+    { value: "communityamerica", label: "CommunityAmerica Credit Union" },
+    { value: "logix", label: "Logix Federal Credit Union" },
+    { value: "redwood", label: "Redwood Credit Union" },
+    { value: "dcu", label: "Digital Federal Credit Union (DCU)" },
+    { value: "bethpage", label: "Bethpage Federal Credit Union" },
+    { value: "teachers-credit-union", label: "Teachers Credit Union" },
+    { value: "navyarmy", label: "NavyArmy Community Credit Union" },
+    { value: "onpoint", label: "OnPoint Community Credit Union" },
     // { value: "other", label: "Other Bank" },
   ]
 
@@ -96,10 +132,22 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
     try {
       setPricesLoading(true)
       
-      // Fetch crypto prices from CoinGecko
+      // Fetch crypto prices from CoinGecko with better error handling
       const cryptoResponse = await fetch(
-        "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,cardano,solana&order=market_cap_desc&per_page=4&page=1&sparkline=false&locale=en"
+        "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,cardano,solana&order=market_cap_desc&per_page=4&page=1&sparkline=false&locale=en",
+        {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          },
+          // Add timeout to prevent hanging requests
+          signal: AbortSignal.timeout(10000) // 10 second timeout
+        }
       )
+      
+      if (!cryptoResponse.ok) {
+        throw new Error(`HTTP error! status: ${cryptoResponse.status}`)
+      }
       
       const cryptoData = await cryptoResponse.json()
       
@@ -196,11 +244,14 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
     }
   }
 
+  // Simple inactivity timeout - 10 minutes
+  useInactivityTimeout(10)
+
   useEffect(() => {
     fetchLivePrices()
     
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchLivePrices, 30000)
+    // Auto-refresh every 60 seconds instead of 30 to reduce API calls
+    const interval = setInterval(fetchLivePrices, 60000)
     return () => clearInterval(interval)
   }, [])
 
@@ -300,10 +351,10 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
               </button>
               <div className="hidden md:flex items-center space-x-3">
                 <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                  {user.username.charAt(0).toUpperCase()}
+                  {(user.username || user.email).charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p className="text-white text-sm font-medium">{user.username}</p>
+                  <p className="text-white text-sm font-medium">{user.username || 'User'}</p>
                   <p className="text-white/60 text-xs">{user.email}</p>
                 </div>
               </div>
@@ -328,7 +379,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
       <div className="relative z-10 container mx-auto px-6 py-8">
         {/* Welcome Banner */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">Welcome back, {user.username}</h1>
+          <h1 className="text-3xl font-bold text-white">Welcome back, {user.username || 'User'}</h1>
           <p className="text-white/60">Here's what's happening with your account today.</p>
         </div>
 
@@ -343,7 +394,11 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
               <p className="text-white/60 text-sm mt-1">Account Number: {account.account_number}</p>
             </div>
             <div className="flex items-center space-x-3 mt-4 md:mt-0">
-            <Button size="sm" className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 group">
+              <div className="hidden md:flex items-center space-x-2 text-xs text-white/60">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span>Session Active</span>
+              </div>
+              <Button size="sm" className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 group">
                 {balanceVisible ? (
                   <>
                     <EyeOff className="h-4 w-4 mr-2" />
@@ -936,7 +991,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
             </TabsContent>
 
              {/* Live Market Rates - Full Width Section */}
-             <div className="mt-8 hidden md:block">
+             {/* <div className="mt-8 hidden md:block">
               <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-semibold text-white">Live Market Rates</h3>
@@ -1035,7 +1090,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
             
           </Tabs>
         </div>

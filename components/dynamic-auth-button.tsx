@@ -9,7 +9,7 @@ interface DynamicAuthButtonProps {
     id: number
     email: string
     role: string
-    username: string
+    username?: string
   } | null
 }
 
@@ -20,10 +20,10 @@ export function DynamicAuthButton({ user }: DynamicAuthButtonProps) {
       <div className="flex items-center space-x-3">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-            {user.username.charAt(0).toUpperCase()}
+            {(user.username || user.email).charAt(0).toUpperCase()}
           </div>
           <div className="hidden md:block">
-            <p className="text-white text-sm font-medium">{user.username}</p>
+            <p className="text-white text-sm font-medium">{user.username || 'User'}</p>
             <p className="text-white/60 text-xs">{user.email}</p>
           </div>
         </div>

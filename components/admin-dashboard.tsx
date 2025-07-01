@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { logout } from "@/app/actions/auth"
 import { updateCustomerDetails, updateTransactionDetails } from "@/app/actions/banking"
+import { useInactivityTimeout } from "@/hooks/use-inactivity-timeout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -51,7 +52,7 @@ interface Transaction {
   user: {
     id: number
     email: string
-    username: string
+    username?: string
   }
   account: {
     id: number
@@ -133,6 +134,9 @@ export function AdminDashboard({ customers, transactions }: AdminDashboardProps)
 
     setLoading(false)
   }
+
+  // Simple inactivity timeout - 10 minutes
+  useInactivityTimeout(10)
 
   // Filter customers based on search query
   const filteredCustomers = customers.filter(
@@ -768,10 +772,10 @@ export function AdminDashboard({ customers, transactions }: AdminDashboardProps)
                             <td className="py-3 px-4">
                               <div className="flex items-center space-x-3">
                                 <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                                  {transaction.user.username.charAt(0).toUpperCase()}
+                                  {(transaction.user.username || transaction.user.email).charAt(0).toUpperCase()}
                                 </div>
                                 <div>
-                                  <p className="text-white font-medium">{transaction.user.username}</p>
+                                  <p className="text-white font-medium">{transaction.user.username || 'User'}</p>
                                   <p className="text-white/60 text-xs">{transaction.user.email}</p>
                                 </div>
                               </div>
