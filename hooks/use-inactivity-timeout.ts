@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from 'react'
+import { logout } from '@/app/actions/auth'
 
 export function useInactivityTimeout(timeoutMinutes: number = 10) {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -18,8 +19,8 @@ export function useInactivityTimeout(timeoutMinutes: number = 10) {
     // Set new timeout
     timeoutRef.current = setTimeout(() => {
       console.log('🕐 Session expired - logging out due to inactivity')
-      // Simple redirect to logout
-      window.location.href = '/api/logout'
+      // Use the auth action logout instead of API route
+      logout()
     }, timeoutMinutes * 60 * 1000)
   }
 

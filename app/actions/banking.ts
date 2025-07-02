@@ -101,6 +101,10 @@ export async function updateTransactionDetails(formData: FormData) {
       updates.created_at = new Date(dateTimeString).toISOString()
     }
 
+    if (Object.keys(updates).length === 0) {
+      return { error: "No changes to update" }
+    }
+
     await updateTransaction(transactionId, updates)
 
     revalidatePath("/admin")

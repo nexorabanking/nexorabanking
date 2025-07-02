@@ -2,6 +2,7 @@ export const env = {
   app: {
     isDevelopment: process.env.NODE_ENV === "development",
     isProduction: process.env.NODE_ENV === "production",
+    url: process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://yourdomain.com"),
   },
   email: {
     // Resend configuration
@@ -19,4 +20,9 @@ export const env = {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || "900000"), // 15 minutes
     maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || "100"),
   },
+}
+
+// Warn about missing production configuration
+if (env.app.isProduction && (!process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL.includes('localhost'))) {
+  console.warn('⚠️  WARNING: NEXT_PUBLIC_APP_URL is not set or contains localhost. This may cause redirect issues in production.')
 } 

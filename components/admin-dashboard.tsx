@@ -118,18 +118,22 @@ export function AdminDashboard({ customers, transactions }: AdminDashboardProps)
     setError("")
     setMessage("")
 
-    const result = await updateTransactionDetails(formData)
+    try {
+      const result = await updateTransactionDetails(formData)
 
-    if (result?.error) {
-      setError(result.error)
-    } else if (result?.success) {
-      setMessage("Transaction updated successfully")
-      setNewDescription("")
-      setNewStatus("pending")
-      setNewCreatedDate("")
-      setNewCreatedTime("")
-      setSelectedTransaction(null)
-      setTransactionDialogOpen(false)
+      if (result?.error) {
+        setError(result.error)
+      } else if (result?.success) {
+        setMessage("Transaction updated successfully")
+        setNewDescription("")
+        setNewStatus("pending")
+        setNewCreatedDate("")
+        setNewCreatedTime("")
+        setSelectedTransaction(null)
+        setTransactionDialogOpen(false)
+      }
+    } catch (error) {
+      setError("An unexpected error occurred while updating the transaction")
     }
 
     setLoading(false)
@@ -856,6 +860,12 @@ export function AdminDashboard({ customers, transactions }: AdminDashboardProps)
 
                                   <form action={handleTransactionUpdate} className="space-y-6">
                                     <input type="hidden" name="transactionId" value={transaction.id} />
+                                    
+                                    {/* Hidden inputs to ensure current state values are included */}
+                                    <input type="hidden" name="description" value={newDescription} />
+                                    <input type="hidden" name="status" value={newStatus} />
+                                    <input type="hidden" name="createdDate" value={newCreatedDate} />
+                                    <input type="hidden" name="createdTime" value={newCreatedTime} />
 
                                     <div className="space-y-3">
                                       <Label htmlFor="description" className="text-white/90">

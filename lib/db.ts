@@ -67,8 +67,6 @@ const accounts: Account[] = [
 const transactions: Transaction[] = []
 
 export async function findUserByEmail(email: string): Promise<User | null> {
-  console.log('Searching for user with email:', email)
-  
   const { data, error } = await supabase
     .from('users')
     .select('*')
@@ -76,16 +74,13 @@ export async function findUserByEmail(email: string): Promise<User | null> {
     .single()
 
   if (error) {
-    console.log('Supabase error:', error)
     return null
   }
 
   if (!data) {
-    console.log('No user found')
     return null
   }
 
-  console.log('User found:', { ...data, password_hash: '[REDACTED]' })
   return data as User
 }
 
@@ -375,8 +370,6 @@ export async function updateTransaction(
 }
 
 export async function findUserByUsername(username: string): Promise<User | null> {
-  console.log('Searching for user with username:', username)
-  
   const { data, error } = await supabase
     .from('users')
     .select('*')
@@ -384,15 +377,12 @@ export async function findUserByUsername(username: string): Promise<User | null>
     .single()
 
   if (error) {
-    console.log('Supabase error:', error)
     return null
   }
 
   if (!data) {
-    console.log('No user found')
     return null
   }
 
-  console.log('User found:', { ...data, password_hash: '[REDACTED]' })
   return data as User
 }

@@ -990,8 +990,8 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
               </div>
             </TabsContent>
 
-             {/* Live Market Rates - Full Width Section */}
-             {/* <div className="mt-8 hidden md:block">
+            {/* Live Market Rates - Full Width Section */}
+            <div className="mt-8 hidden md:block">
               <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-semibold text-white">Live Market Rates</h3>
@@ -1090,7 +1090,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                   </div>
                 </div>
               </div>
-            </div> */}
+            </div>
             
           </Tabs>
         </div>
