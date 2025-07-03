@@ -398,7 +398,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                 <span>Session Active</span>
               </div>
-              <Button size="sm" className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 group">
+              {/* <Button size="sm" className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 group">
                 {balanceVisible ? (
                   <>
                     <EyeOff className="h-4 w-4 mr-2" />
@@ -414,7 +414,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
               <Button size="sm" className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 group">
                 <Plus className="h-4 w-4 mr-2" />
                 New Transaction
-              </Button>
+              </Button> */}
             </div>
           </div>
 
@@ -991,7 +991,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
             </TabsContent>
 
             {/* Live Market Rates - Full Width Section */}
-            <div className="mt-8 hidden md:block">
+            {/* <div className="mt-8 hidden md:block">
               <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-semibold text-white">Live Market Rates</h3>
@@ -1090,7 +1090,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
             
           </Tabs>
         </div>
