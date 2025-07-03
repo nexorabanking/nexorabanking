@@ -20,9 +20,9 @@ export interface JWTPayload extends User {
 export function generateToken(user: User): string {
   try {
     return sign(user, env.jwt.secret as any, {
-      expiresIn: env.jwt.expiresIn as any,
-      issuer: "olsa-banking",
-      audience: "olsa-banking-users",
+      expiresIn: "24h", // Set to 24 hours
+      issuer: "nexora-banking",
+      audience: "nexora-banking-users",
     })
   } catch (error) {
     console.error("❌ Error generating JWT token:", error)
@@ -33,8 +33,8 @@ export function generateToken(user: User): string {
 export function verifyToken(token: string): JWTPayload | null {
   try {
     return verify(token, env.jwt.secret as any, {
-      issuer: "olsa-banking",
-      audience: "olsa-banking-users",
+      issuer: "nexora-banking",
+      audience: "nexora-banking-users",
     }) as JWTPayload
   } catch (error) {
     if (env.app.isDevelopment) {
@@ -94,7 +94,7 @@ export async function setUserToken(user: User): Promise<void> {
       httpOnly: true,
       secure: env.app.isProduction,
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24, // 24 hours
       path: "/",
     })
 
