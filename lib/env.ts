@@ -2,7 +2,7 @@ export const env = {
   app: {
     isDevelopment: process.env.NODE_ENV === "development",
     isProduction: process.env.NODE_ENV === "production",
-    url: process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://yourdomain.com"),
+    url: process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://nexorabanking.com"),
   },
   email: {
     // Resend configuration

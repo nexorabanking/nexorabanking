@@ -373,7 +373,7 @@ export async function findUserByUsername(username: string): Promise<User | null>
   const { data, error } = await supabase
     .from('users')
     .select('*')
-    .eq('username', username)
+    .ilike('username', username)
     .single()
 
   if (error) {
