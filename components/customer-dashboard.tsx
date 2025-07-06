@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { logout } from "@/app/actions/auth"
 import { requestWithdrawal } from "@/app/actions/banking"
+import { formatCurrency } from "@/lib/utils"
 import { useInactivityTimeout } from "@/hooks/use-inactivity-timeout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -423,7 +424,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
               <div>
                 <p className="text-[#581c87] md:text-white/60 text-sm mb-1">Available Balance</p>
                 {balanceVisible ? (
-                  <p className="text-4xl font-bold text-[#581c87] md:text-white">${account.balance.toFixed(2)}</p>
+                  <p className="text-4xl font-bold text-[#581c87] md:text-white">{formatCurrency(account.balance)}</p>
                 ) : (
                   <p className="text-4xl font-bold text-[#581c87] md:text-white">••••••</p>
                 )}
@@ -559,7 +560,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                                 transaction.type === "withdrawal" ? "text-red-400" : "text-green-400"
                               }`}
                             >
-                              {transaction.type === "withdrawal" ? "-" : "+"}${transaction.amount.toFixed(2)}
+                              {transaction.type === "withdrawal" ? "-" : "+"}{formatCurrency(transaction.amount)}
                             </p>
                             <Badge
                               className={
@@ -684,7 +685,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                             transaction.type === "withdrawal" ? "text-red-400" : "text-green-400"
                           }`}
                         >
-                          {transaction.type === "withdrawal" ? "-" : "+"}${transaction.amount.toFixed(2)}
+                          {transaction.type === "withdrawal" ? "-" : "+"}{formatCurrency(transaction.amount)}
                         </p>
                         <Badge
                           className={
@@ -812,7 +813,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-white/50">Available</span>
-                        <span className="text-white font-medium">${account.balance.toFixed(2)}</span>
+                        <span className="text-white font-medium">{formatCurrency(account.balance)}</span>
                       </div>
                     </div>
 
