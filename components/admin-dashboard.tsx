@@ -789,7 +789,7 @@ export function AdminDashboard({ customers, transactions }: AdminDashboardProps)
                           name="accountId"
                           title="Select a customer"
                           required
-                          className="w-full bg-white/5 border border-white/20 text-[#0a0a0f] rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className="w-full bg-white/5 border border-white/20 text-[#c084fc] rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                           onChange={(e) => {
                             const customer = customers.find(c => c.account.id === parseInt(e.target.value))
                             setSelectedCustomerForTransaction(customer || null)
@@ -815,7 +815,7 @@ export function AdminDashboard({ customers, transactions }: AdminDashboardProps)
                           value={transactionType}
                           onChange={(e) => setTransactionType(e.target.value as "credit" | "debit")}
                           required
-                          className="w-full bg-white/5 border border-white/20 text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className="w-full bg-white/5 border border-white/20 text-[#c084fc] rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                         >
                           <option value="credit">Credit (Add to balance)</option>
                           <option value="debit">Debit (Deduct from balance)</option>
@@ -1047,7 +1047,7 @@ export function AdminDashboard({ customers, transactions }: AdminDashboardProps)
                                         name="status"
                                         value={newStatus}
                                         onChange={(e) => setNewStatus(e.target.value as "pending" | "completed" | "rejected")}
-                                        className="w-full bg-white/5 border border-white/20 text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                        className="w-full bg-white/5 border border-white/20 text-[#c084fc] rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                                         aria-label="Transaction status"
                                         title="Transaction status"
                                       >
