@@ -92,7 +92,7 @@ export function AdminDashboard({ customers, transactions }: AdminDashboardProps)
   const [activeTab, setActiveTab] = useState("dashboard")
   const [searchQuery, setSearchQuery] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [transactionDialogOpen, setTransactionDialogOpen] = useState(false)
+  const [transactionDialogOpen, setTransactionDialogOpen] = useState<number | null>(null)
   const [addTransactionDialogOpen, setAddTransactionDialogOpen] = useState(false)
   const [selectedCustomerForTransaction, setSelectedCustomerForTransaction] = useState<Customer | null>(null)
   const [transactionAmount, setTransactionAmount] = useState("")
@@ -136,7 +136,7 @@ export function AdminDashboard({ customers, transactions }: AdminDashboardProps)
         setNewCreatedDate("")
         setNewCreatedTime("")
         setSelectedTransaction(null)
-        setTransactionDialogOpen(false)
+        setTransactionDialogOpen(null)
       }
     } catch (error) {
       setError("An unexpected error occurred while updating the transaction")
@@ -986,7 +986,14 @@ export function AdminDashboard({ customers, transactions }: AdminDashboardProps)
                               </p>
                             </td>
                             <td className="py-3 px-4 text-right">
-                              <Dialog open={transactionDialogOpen} onOpenChange={setTransactionDialogOpen}>
+                              <Dialog 
+                                open={transactionDialogOpen === transaction.id} 
+                                onOpenChange={(open) => {
+                                  if (!open) {
+                                    setTransactionDialogOpen(null)
+                                  }
+                                }}
+                              >
                                 <DialogTrigger asChild>
                                   <Button 
                                     size="sm" 
@@ -998,7 +1005,7 @@ export function AdminDashboard({ customers, transactions }: AdminDashboardProps)
                                       const date = new Date(transaction.created_at)
                                       setNewCreatedDate(date.toISOString().split('T')[0])
                                       setNewCreatedTime(date.toTimeString().split(' ')[0])
-                                      setTransactionDialogOpen(true)
+                                      setTransactionDialogOpen(transaction.id)
                                     }}
                                   >
                                     <Edit className="h-4 w-4" />
