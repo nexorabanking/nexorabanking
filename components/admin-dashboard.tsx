@@ -1014,12 +1014,6 @@ export function AdminDashboard({ customers, transactions }: AdminDashboardProps)
 
                                   <form action={handleTransactionUpdate} className="space-y-6">
                                     <input type="hidden" name="transactionId" value={transaction.id} />
-                                    
-                                    {/* Hidden inputs to ensure current state values are included */}
-                                    <input type="hidden" name="description" value={newDescription} />
-                                    <input type="hidden" name="status" value={newStatus} />
-                                    <input type="hidden" name="createdDate" value={newCreatedDate} />
-                                    <input type="hidden" name="createdTime" value={newCreatedTime} />
 
                                     <div className="space-y-3">
                                       <Label htmlFor="description" className="text-white/90">
