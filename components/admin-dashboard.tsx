@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { logout } from "@/app/actions/auth"
-import { updateCustomerDetails, updateTransactionDetails } from "@/app/actions/banking"
+import { updateCustomerDetails, updateTransactionDetails, createAdminTransaction } from "@/app/actions/banking"
 import { useInactivityTimeout } from "@/hooks/use-inactivity-timeout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -38,6 +38,7 @@ import {
   Filter,
   Lock,
   Eye,
+  Plus,
 } from "lucide-react"
 
 interface Transaction {
@@ -92,6 +93,11 @@ export function AdminDashboard({ customers, transactions }: AdminDashboardProps)
   const [searchQuery, setSearchQuery] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
   const [transactionDialogOpen, setTransactionDialogOpen] = useState(false)
+  const [addTransactionDialogOpen, setAddTransactionDialogOpen] = useState(false)
+  const [selectedCustomerForTransaction, setSelectedCustomerForTransaction] = useState<Customer | null>(null)
+  const [transactionAmount, setTransactionAmount] = useState("")
+  const [transactionDescription, setTransactionDescription] = useState("")
+  const [transactionType, setTransactionType] = useState<"credit" | "debit">("credit")
 
   async function handleCustomerUpdate(formData: FormData) {
     setLoading(true)
@@ -134,6 +140,31 @@ export function AdminDashboard({ customers, transactions }: AdminDashboardProps)
       }
     } catch (error) {
       setError("An unexpected error occurred while updating the transaction")
+    }
+
+    setLoading(false)
+  }
+
+  async function handleCreateTransaction(formData: FormData) {
+    setLoading(true)
+    setError("")
+    setMessage("")
+
+    try {
+      const result = await createAdminTransaction(formData)
+
+      if (result?.error) {
+        setError(result.error)
+      } else if (result?.success) {
+        setMessage(result.message || "Transaction created successfully")
+        setTransactionAmount("")
+        setTransactionDescription("")
+        setTransactionType("credit")
+        setSelectedCustomerForTransaction(null)
+        setAddTransactionDialogOpen(false)
+      }
+    } catch (error) {
+      setError("An unexpected error occurred while creating the transaction")
     }
 
     setLoading(false)
@@ -731,16 +762,138 @@ export function AdminDashboard({ customers, transactions }: AdminDashboardProps)
                   <h2 className="text-2xl font-bold text-white">Transaction Management</h2>
                   <p className="text-white/60">Monitor and manage all system transactions</p>
                 </div>
-                <div className="flex items-center space-x-2 mt-4 md:mt-0">
-                  <Button size="sm" className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 group">
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Refresh
-                  </Button>
-                  <Button size="sm" className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 group">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export
-                  </Button>
-                </div>
+                              <div className="flex items-center space-x-2 mt-4 md:mt-0">
+                <Dialog open={addTransactionDialogOpen} onOpenChange={setAddTransactionDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 group">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Transaction
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-[#0a0a0f]/95 backdrop-blur-xl border border-white/10 text-white">
+                    <DialogHeader>
+                      <DialogTitle className="text-white">Create New Transaction</DialogTitle>
+                      <DialogDescription className="text-white/60">
+                        Add a credit or debit transaction for a customer
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    <form action={handleCreateTransaction} className="space-y-6">
+                      <div className="space-y-3">
+                        <Label htmlFor="customerSelect" className="text-white/90">
+                          Select Customer
+                        </Label>
+                        <select
+                          id="customerSelect"
+                          name="accountId"
+                          title="Select a customer"
+                          required
+                          className="w-full bg-white/5 border border-white/20 text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          onChange={(e) => {
+                            const customer = customers.find(c => c.account.id === parseInt(e.target.value))
+                            setSelectedCustomerForTransaction(customer || null)
+                          }}
+                        >
+                          <option value="">Select a customer...</option>
+                          {customers.map((customer) => (
+                            <option key={customer.id} value={customer.account.id}>
+                              {customer.email} - ${customer.account.balance.toFixed(2)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="transactionType" className="text-white/90">
+                          Transaction Type
+                        </Label>
+                        <select
+                          id="transactionType"
+                          name="transactionType"
+                          title="Transaction type"
+                          value={transactionType}
+                          onChange={(e) => setTransactionType(e.target.value as "credit" | "debit")}
+                          required
+                          className="w-full bg-white/5 border border-white/20 text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        >
+                          <option value="credit">Credit (Add to balance)</option>
+                          <option value="debit">Debit (Deduct from balance)</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="transactionAmount" className="text-white/90">
+                          Amount
+                        </Label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50">
+                            $
+                          </span>
+                          <Input
+                            id="transactionAmount"
+                            name="amount"
+                            type="number"
+                            step="0.01"
+                            min="0.01"
+                            placeholder="0.00"
+                            value={transactionAmount}
+                            onChange={(e) => setTransactionAmount(e.target.value)}
+                            required
+                            className="bg-white/5 border-white/20 text-white pl-8"
+                          />
+                        </div>
+                        {selectedCustomerForTransaction && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-white/50">Current Balance</span>
+                            <span className="text-white font-medium">
+                              ${selectedCustomerForTransaction.account.balance.toFixed(2)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="transactionDescription" className="text-white/90">
+                          Description
+                        </Label>
+                        <Input
+                          id="transactionDescription"
+                          name="description"
+                          type="text"
+                          placeholder="Enter transaction description"
+                          value={transactionDescription}
+                          onChange={(e) => setTransactionDescription(e.target.value)}
+                          required
+                          className="bg-white/5 border-white/20 text-white"
+                        />
+                      </div>
+
+                      <Button
+                        type="submit"
+                        className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800"
+                        disabled={loading}
+                      >
+                        {loading ? (
+                          "Creating Transaction..."
+                        ) : (
+                          <>
+                            Create Transaction
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </>
+                        )}
+                      </Button>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+                <Button size="sm" className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 group">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Refresh
+                </Button>
+                <Button size="sm" className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 group">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+              </div>
               </div>
 
               {/* Transaction Table */}

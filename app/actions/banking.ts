@@ -2,6 +2,7 @@
 
 import { requireAuth } from "@/lib/auth"
 import { getAccountByUserId, updateAccountBalance, updateAccountNumber, createTransaction, processWithdrawal, updateTransaction } from "@/lib/db"
+import { supabase } from "@/lib/supabase"
 import { revalidatePath } from "next/cache"
 
 export async function requestWithdrawal(formData: FormData) {
@@ -111,5 +112,69 @@ export async function updateTransactionDetails(formData: FormData) {
     return { success: true, message: "Transaction updated successfully" }
   } catch (error) {
     return { error: "Failed to update transaction" }
+  }
+}
+
+export async function createAdminTransaction(formData: FormData) {
+  await requireAuth("admin")
+
+  const accountId = Number.parseInt(formData.get("accountId") as string)
+  const amount = Number.parseFloat(formData.get("amount") as string)
+  const description = formData.get("description") as string
+  const transactionType = formData.get("transactionType") as "credit" | "debit"
+
+  if (!accountId || !amount || !description || !transactionType) {
+    return { error: "All fields are required" }
+  }
+
+  if (amount <= 0) {
+    return { error: "Amount must be greater than 0" }
+  }
+
+  if (!["credit", "debit"].includes(transactionType)) {
+    return { error: "Invalid transaction type" }
+  }
+
+  try {
+    // Get current account balance
+    const { data: account, error: accountError } = await supabase
+      .from('accounts')
+      .select('balance')
+      .eq('id', accountId)
+      .single()
+
+    if (accountError || !account) {
+      return { error: "Account not found" }
+    }
+
+    const currentBalance = account.balance
+    let newBalance: number
+
+    // Calculate new balance based on transaction type
+    if (transactionType === "credit") {
+      newBalance = currentBalance + amount
+    } else {
+      // For debit, check if there's sufficient balance
+      if (currentBalance < amount) {
+        return { error: "Insufficient balance for debit transaction" }
+      }
+      newBalance = currentBalance - amount
+    }
+
+    // Update account balance
+    await updateAccountBalance(accountId, newBalance)
+
+    // Create transaction record
+    const dbTransactionType = transactionType === "credit" ? "deposit" : "withdrawal"
+    await createTransaction(accountId, dbTransactionType, amount, description)
+
+    revalidatePath("/admin")
+    return { 
+      success: true, 
+      message: `${transactionType === "credit" ? "Credit" : "Debit"} transaction created successfully` 
+    }
+  } catch (error) {
+    console.error("Error creating admin transaction:", error)
+    return { error: "Failed to create transaction" }
   }
 }
