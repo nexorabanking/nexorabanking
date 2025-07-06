@@ -131,6 +131,11 @@ export async function createAdminTransaction(formData: FormData) {
     return { error: "Amount must be greater than 0" }
   }
 
+  // Check if amount is too large for the database field
+  if (amount >= 1000000000000) { // 1 trillion
+    return { error: "Amount is too large. Maximum allowed is $999,999,999,999.99" }
+  }
+
   if (!["credit", "debit"].includes(transactionType)) {
     return { error: "Invalid transaction type" }
   }
