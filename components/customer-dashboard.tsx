@@ -440,7 +440,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-all duration-300">
             <div className="flex items-center justify-between mb-2">
               <p className="text-white/60 text-sm">Transactions</p>
@@ -469,7 +469,7 @@ export function CustomerDashboard({ user, account, transactions }: CustomerDashb
             </div>
             <p className="text-2xl font-bold text-white">{deposits}</p>
           </div>
-        </div>
+        </div> */}
 
         {/* Main Content Tabs */}
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">

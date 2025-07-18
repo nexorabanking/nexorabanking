@@ -53,12 +53,12 @@ export function Footer() {
           <div className="space-y-4">
             <h3 className="text-white font-semibold text-lg">Support</h3>
             <div className="space-y-3 text-sm">
-              <div className="flex items-start space-x-3">
+              {/* <div className="flex items-start space-x-3">
                 <MapPin className="w-4 h-4 text-white/60 mt-0.5 flex-shrink-0" />
                 <span className="text-white/60">
                 4512 Edgewood Avenue, Fresno, CA 93710
                 </span>
-              </div>
+              </div> */}
               <div className="flex items-center space-x-3">
                 <Phone className="w-4 h-4 text-white/60 flex-shrink-0" />
                 <span className="text-white/60">+1 (559) 1CO-YOTE</span>
